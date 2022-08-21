@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx ts-node src/gridBot.ts > grid_bot.log"
+    "start": "npx ts-node src/gridBot.ts"
   },
   "keywords": [],
   "author": "",

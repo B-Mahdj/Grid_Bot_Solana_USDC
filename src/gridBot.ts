@@ -66,7 +66,7 @@ async function getSolanaPriceAndBestRoute(): Promise<[number, [any]]> {
 }
 
 export async function getAmountSolToUse(): Promise<number> {
-
+    return 0;
 }
 
 
