@@ -1,12 +1,17 @@
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import axios from 'axios';
 import { setup } from './setup';
+const express = require('express');
+const port = 3000;
 const variation: number = +process.env.DECIMAL_VARIATION;
 const slippage = +process.env.SLIPPAGE;
 const DECIMALS_PER_USDC = +process.env.DECIMALS_PER_USDC;
 var numberOfSells = 0;
 var numberOfBuys = 0;
 
+
+const app = express();
+app.listen(port, () => console.log(`App listening on port ${port}!`));
 launch();
 
 export async function launch() {
