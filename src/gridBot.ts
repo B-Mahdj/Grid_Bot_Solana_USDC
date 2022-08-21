@@ -28,7 +28,7 @@ export async function launch() {
         // If the price is equals or below the lowest buy order inside the array, buy the coin
         if (solanaPrice <= buyOrders[0]) {
             console.log("Buying solana at price", solanaPrice);
-            console.log("Best route:", bestRoute);
+            //console.log("Best route found is:", bestRoute);
             await buySolana(bestRoute);
             buyOrders.splice(0, 1);
             // Update the sell orders array with a new sell order at the start of the array
@@ -40,7 +40,7 @@ export async function launch() {
         // If the price is equals or above the lowest sell order, sell the coin
         if (solanaPrice >= sellOrders[0]) {
             console.log("Selling at price", solanaPrice);
-            console.log("Route is:", bestRoute);
+            //console.log("Best route found is:", bestRoute);
             await sellSolana(bestRoute);
             sellOrders.splice(0, 1);
             // Update the buy orders array with a new buy order at the start of the array
@@ -66,7 +66,6 @@ async function getSolanaPriceAndBestRoute(): Promise<[number, [any]]> {
         )
     ).data;
     const routes = data;
-    console.log("Best route found is:", routes[0]);
     return [(routes[0].outAmount / DECIMALS_PER_USDC), routes[0]];
 }
 
