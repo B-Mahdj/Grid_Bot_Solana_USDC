@@ -1,3 +1,4 @@
 my-solana-wallet
 node_modules
 .env
+*.log
