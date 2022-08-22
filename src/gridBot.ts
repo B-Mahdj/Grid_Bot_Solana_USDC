@@ -1,11 +1,11 @@
-import { LAMPORTS_PER_SOL } from '@solana/web3.js';
-import axios from 'axios';
+import { Connection } from '@solana/web3.js';
+import { getAmountSolToSell, getAmountOfUSDCToSell } from './getTokens';
+import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL } from './prices';
 import { setup } from './setup';
 const express = require('express');
 const port = 3000;
 const variation: number = +process.env.DECIMAL_VARIATION;
-const slippage = +process.env.SLIPPAGE;
-const DECIMALS_PER_USDC = +process.env.DECIMALS_PER_USDC;
+const solana = new Connection(process.env.SOLANA_RPC_URL);
 var numberOfSells = 0;
 var numberOfBuys = 0;
 var amountOfSolToSell = 0;
@@ -17,8 +17,11 @@ launch();
 
 export async function launch() {
     const { solanaWallet, orders } = await setup();
-    amountOfSolToSell = await getAmountSolToUse();
-    amountOfUSDCToSell = await getAmountOfUSDCToSell();
+    console.log("Solana wallet:", solanaWallet.publicKey.toString());
+    amountOfSolToSell = await getAmountSolToSell(solanaWallet, solana);
+    amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
+    console.log("Amount of sol to sell:", amountOfSolToSell);
+    console.log("Amount of USDC to sell:", amountOfUSDCToSell);
 
     var buyOrders = orders.buyOrders;
     var sellOrders = orders.sellOrders;
@@ -33,7 +36,7 @@ export async function launch() {
         if (solanaPrice <= buyOrders[0]) {
             console.log("Buying solana at price", solanaPrice);
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
-            console.log("Using " + amountOfUSDCToSell + " USDC to buy" + price + " SOL");
+            console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
             await buySolana(bestRoute);
             buyOrders.splice(0, 1);
             // Update the sell orders array with a new sell order at the start of the array
@@ -46,7 +49,7 @@ export async function launch() {
         if (solanaPrice >= sellOrders[0]) {
             console.log("Selling solana at price", solanaPrice);
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell);
-            console.log("Using " + amountOfSolToSell + " SOL to sell" + price + " USDC");
+            console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
             await sellSolana(bestRoute);
             sellOrders.splice(0, 1);
             // Update the buy orders array with a new buy order at the start of the array
@@ -57,53 +60,6 @@ export async function launch() {
 
         await sleep(1000);
     }
-}
-
-// Create sleep function
-export async function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function getSolanaPriceFor1SOL(): Promise<number> {
-    var amount = LAMPORTS_PER_SOL;
-    const { data } = await (
-        await axios.get(
-            `https://quote-api.jup.ag/v1/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=${amount}&slippage=${slippage}`
-        )
-    ).data;
-    const routes = data;
-    return routes[0].outAmount / DECIMALS_PER_USDC;
-}
-
-
-async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promise<[number, [any]]> {
-    var amount = LAMPORTS_PER_SOL;
-    const { data } = await (
-        await axios.get(
-            `https://quote-api.jup.ag/v1/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=${amount}&slippage=${slippage}`
-        )
-    ).data;
-    const routes = data;
-    return [(routes[0].outAmount / DECIMALS_PER_USDC), routes[0]];
-}
-
-async function getSolanaPriceAndBestRouteToBuySol(amount:number): Promise<[number, [any]]> {
-    const { data } = await (
-        await axios.get(
-            `https://quote-api.jup.ag/v1/quote?inputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&outputMint=So11111111111111111111111111111111111111112&amount=${amount}&slippage=${slippage}`
-        )
-    ).data;
-    const routes = data;
-    return [(routes[0].outAmount / LAMPORTS_PER_SOL), routes[0]];
-}
-
-async function getAmountSolToUse(): Promise<number> {
-    return 0;
-}
-
-
-async function getAmountOfUSDCToSell(): Promise<number> {
-    return 0;
 }
 
 async function buySolana(price: any[]): Promise<void> {
@@ -125,3 +81,8 @@ async function sellSolana(price: any[]): Promise<void> {
     // Update the amount of sol/ USDC to use for next order
 }
 
+
+// Create sleep function
+export async function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
