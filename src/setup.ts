@@ -23,13 +23,10 @@ async function createInitialBuyAndSellOrders(){
     const sellOrders = [];
     for(let i = 1; i <= 20; i++){
         let buyOrder:number = initialPrice - ((variation*i) * initialPrice);
-        // Limit the buy order to be maximum double digits after dot
-        buyOrder = Math.round(buyOrder * 100) / 100;
         buyOrders.push(buyOrder);
     }
     for(let i = 1; i <= 20; i++){
         let sellOrder = initialPrice + ((variation*i) * initialPrice);
-        sellOrder =  Math.round(sellOrder * 100) / 100;
         sellOrders.push(sellOrder);
     }
     return {buyOrders, sellOrders};
