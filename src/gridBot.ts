@@ -144,6 +144,7 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
         var latestBlockHash = await solana.getLatestBlockhash();
         transaction.recentBlockhash = latestBlockHash.blockhash;
         transaction.feePayer = wallet.publicKey;
+        transaction.lastValidBlockHeight = latestBlockHash.height;
         console.log("serializedTransaction:", serializedTransaction);
         console.log("transaction:", transaction);
         const txid = await solana.sendTransaction(transaction, [wallet.payer], {
