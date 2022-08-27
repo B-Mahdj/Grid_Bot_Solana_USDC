@@ -147,7 +147,8 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
         console.log("transaction:", transaction);
         const txid = await solana.sendTransaction(transaction, [wallet.payer], {
             skipPreflight: true
-        })
+        });
+        console.log("Waiting for solana to confirm transaction:", txid);
         await solana.confirmTransaction({
             blockhash: latestBlockHash.blockhash,
             lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
