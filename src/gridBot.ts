@@ -141,12 +141,13 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
     for(let serializedTransaction of [setupTransaction, swapTransaction, cleanupTransaction].filter(Boolean)){
         // get transaction object from serialized transaction
         const transaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
+        var latestBlockHash = await solana.getLatestBlockhash();
+        transaction.recentBlockhash = latestBlockHash.blockhash;
         console.log("serializedTransaction:", serializedTransaction);
         console.log("transaction:", transaction);
         const txid = await solana.sendTransaction(transaction, [wallet.payer], {
             skipPreflight: true
         })
-        const latestBlockHash = await solana.getLatestBlockhash();
         await solana.confirmTransaction({
             blockhash: latestBlockHash.blockhash,
             lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
