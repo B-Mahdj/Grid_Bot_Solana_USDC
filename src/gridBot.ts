@@ -36,30 +36,32 @@ export async function launch() {
 
         // If the price is equals or below the lowest buy order inside the array, buy the coin
         if (solanaPrice <= buyOrders[0]) {
-            console.log("Buying solana at price", solanaPrice);
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
-            console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
-            await buySolana(bestRoute, solanaWallet);
-            // Delete the buy Order executed
-            buyOrders.splice(0, 1);
-            // Update the sell orders array with a new sell order at the start of the array
-            sellOrders.unshift(solanaPrice + ((variation) * solanaPrice));
-            // Sort the sellOrders in ascending order
-            sellOrders.sort((a, b) => a - b);
+            if(amountOfUSDCToSell > 0){
+                console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
+                await buySolana(bestRoute, solanaWallet);
+                // Delete the buy Order executed
+                buyOrders.splice(0, 1);
+                // Update the sell orders array with a new sell order at the start of the array
+                sellOrders.unshift(solanaPrice + ((variation) * solanaPrice));
+                // Sort the sellOrders in ascending order
+                sellOrders.sort((a, b) => a - b);
+            }
         }
 
         // If the price is equals or above the lowest sell order, sell the coin
         if (solanaPrice >= sellOrders[0]) {
-            console.log("Selling solana at price", solanaPrice);
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell);
-            console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
-            await sellSolana(bestRoute, solanaWallet);
-            // Delete the sell order executed
-            sellOrders.splice(0, 1);
-            // Update the buy orders array with a new buy order at the start of the array
-            buyOrders.unshift(solanaPrice - ((variation) * solanaPrice));
-            // Sort the buyOrders in ascending order
-            buyOrders.sort((a, b) => a - b);
+            if(amountOfSolToSell > 0){
+                console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
+                await sellSolana(bestRoute, solanaWallet);
+                // Delete the sell order executed
+                sellOrders.splice(0, 1);
+                // Update the buy orders array with a new buy order at the start of the array
+                buyOrders.unshift(solanaPrice - ((variation) * solanaPrice));
+                // Sort the buyOrders in ascending order
+                buyOrders.sort((a, b) => a - b);
+            }
         }
 
         await sleep(1000);
