@@ -6,6 +6,7 @@ const DECIMALS_PER_USDC = +process.env.DECIMALS_PER_USDC;
 
 export async function getSolanaPriceFor1SOL(): Promise<number> {
     var amount = LAMPORTS_PER_SOL;
+    amount = parseInt(amount.toString());
     try { 
         const { data } = await (
             await axios.get(
@@ -22,6 +23,7 @@ export async function getSolanaPriceFor1SOL(): Promise<number> {
 
 
 export async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promise<[number, [any]]> {
+    amount = parseInt(amount.toString());
     try {
         const { data } = await (
             await axios.get(
@@ -37,6 +39,7 @@ export async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promis
 }
 
 export async function getSolanaPriceAndBestRouteToBuySol(amount:number): Promise<[number, [any]]> {
+    amount = parseInt(amount.toString());
     try{
         const { data } = await (
             await axios.get(
