@@ -17,7 +17,6 @@ export async function getSolanaPriceFor1SOL(): Promise<number> {
 
 
 export async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promise<[number, [any]]> {
-    var amount = LAMPORTS_PER_SOL;
     const { data } = await (
         await axios.get(
             `https://quote-api.jup.ag/v1/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=${amount}&slippage=${slippage}`
