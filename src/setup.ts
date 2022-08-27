@@ -33,9 +33,14 @@ async function createInitialBuyAndSellOrders(){
 }
 
 async function getSolInitialInfo() {
-    const solInfo = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true`);
-    console.log("Solana initial Info : ", solInfo.data);
-    return solInfo.data;
+    try { 
+        const solInfo = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true`);
+        console.log("Solana initial Info : ", solInfo.data);
+        return solInfo.data;
+    }
+    catch (error) {
+        console.log(error);
+    }
 }
 
 async function getSolanaWallet(){
