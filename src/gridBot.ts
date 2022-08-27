@@ -1,7 +1,9 @@
-import { Connection } from '@solana/web3.js';
+import { Wallet } from '@project-serum/anchor';
+import { Connection, Transaction } from '@solana/web3.js';
 import { getAmountSolToSell, getAmountOfUSDCToSell } from './getTokens';
 import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL } from './prices';
 import { setup } from './setup';
+import fetch from 'cross-fetch'
 const express = require('express');
 const port = 3000;
 const variation: number = +process.env.DECIMAL_VARIATION;
@@ -37,7 +39,8 @@ export async function launch() {
             console.log("Buying solana at price", solanaPrice);
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
             console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
-            await buySolana(bestRoute);
+            await buySolana(bestRoute, solanaWallet);
+            // Delete the buy Order executed
             buyOrders.splice(0, 1);
             // Update the sell orders array with a new sell order at the start of the array
             sellOrders.unshift(solanaPrice + ((variation) * solanaPrice));
@@ -50,7 +53,8 @@ export async function launch() {
             console.log("Selling solana at price", solanaPrice);
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell);
             console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
-            await sellSolana(bestRoute);
+            await sellSolana(bestRoute, solanaWallet);
+            // Delete the sell order executed
             sellOrders.splice(0, 1);
             // Update the buy orders array with a new buy order at the start of the array
             buyOrders.unshift(solanaPrice - ((variation) * solanaPrice));
@@ -62,23 +66,93 @@ export async function launch() {
     }
 }
 
-async function buySolana(price: any[]): Promise<void> {
+async function buySolana(route: any[], wallet:Wallet): Promise<void> {
     numberOfBuys++;
     console.log("Number of buys:", numberOfBuys);
 
     // Make the buy order
+    var transactions = await createTransactions(route, wallet);
+    var setupTransaction, swapTransaction, cleanupTransaction;
+    if(transactions.setupTransaction !== undefined){    setupTransaction = transactions.setupTransaction;    }
+    if(transactions.swapTransaction !== undefined){    swapTransaction = transactions.swapTransaction;    }
+    if(transactions.cleanupTransaction !== undefined){    cleanupTransaction = transactions.cleanupTransaction;    }
 
-    // Update the amount of sol/ USDC to use for next order
+    console.log("Transaction for buying : ");
+    console.log("setupTransaction:", setupTransaction);
+    console.log("swapTransaction:", swapTransaction);
+    console.log("cleanupTransaction:", cleanupTransaction);
+
+    await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+
+    // Update the amount of USDC to use for next order
+    amountOfUSDCToSell = await getAmountOfUSDCToSell(wallet, solana);
+
 }
 
 
-async function sellSolana(price: any[]): Promise<void> {
+async function sellSolana(route: any[], wallet:Wallet): Promise<void> {
     numberOfSells++;
     console.log("Number of sells:", numberOfSells);
 
     // Make the sell order
+    var transactions = await createTransactions(route, wallet);
+    var setupTransaction, swapTransaction, cleanupTransaction;
+    if(transactions.setupTransaction !== undefined){    setupTransaction = transactions.setupTransaction;    }
+    if(transactions.swapTransaction !== undefined){    swapTransaction = transactions.swapTransaction;    }
+    if(transactions.cleanupTransaction !== undefined){    cleanupTransaction = transactions.cleanupTransaction;    }
 
-    // Update the amount of sol/ USDC to use for next order
+    console.log("Transaction for selling : ");
+    console.log("setupTransaction:", setupTransaction);
+    console.log("swapTransaction:", swapTransaction);
+    console.log("cleanupTransaction:", cleanupTransaction);
+
+    await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+
+    // Update the amount of SOL to use for next order
+    amountOfSolToSell = await getAmountSolToSell(wallet, solana);
+}
+
+
+async function createTransactions(route: any[], wallet:Wallet) {
+    // get serialized transactions for the swap
+    const transactions = await (
+    await fetch('https://quote-api.jup.ag/v1/swap', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        // route from /quote api
+        route: route,
+        // user public key to be used for the swap
+        userPublicKey: wallet.publicKey.toString(),
+        // auto wrap and unwrap SOL. default is true
+        wrapUnwrapSOL: true 
+      })
+    })
+  ).json();
+
+    return transactions;
+}
+
+async function executeTransactions (setupTransaction:string, swapTransaction: string, cleanupTransaction: string, wallet:Wallet): Promise<void> {
+    for(let serializedTransaction of [setupTransaction, swapTransaction, cleanupTransaction].filter(Boolean)){
+        // get transaction object from serialized transaction
+        const transaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
+        console.log("serializedTransaction:", serializedTransaction);
+        console.log("transaction:", transaction);
+        const txid = await solana.sendTransaction(transaction, [wallet.payer], {
+            skipPreflight: true
+        })
+        const latestBlockHash = await solana.getLatestBlockhash();
+        await solana.confirmTransaction({
+            blockhash: latestBlockHash.blockhash,
+            lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+            signature: txid,
+        });
+        console.log(`https://solscan.io/tx/${txid}`)
+    }
+
 }
 
 
@@ -86,3 +160,4 @@ async function sellSolana(price: any[]): Promise<void> {
 export async function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
