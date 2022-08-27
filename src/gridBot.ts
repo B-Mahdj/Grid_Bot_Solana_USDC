@@ -143,6 +143,7 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
         const transaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
         var latestBlockHash = await solana.getLatestBlockhash();
         transaction.recentBlockhash = latestBlockHash.blockhash;
+        transaction.feePayer = wallet.publicKey;
         console.log("serializedTransaction:", serializedTransaction);
         console.log("transaction:", transaction);
         const txid = await solana.sendTransaction(transaction, [wallet.payer], {
@@ -154,9 +155,8 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
             lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
             signature: txid,
         });
-        console.log(`https://solscan.io/tx/${txid}`)
+        console.log(`https://solscan.io/tx/${txid}`);
     }
-
 }
 
 
