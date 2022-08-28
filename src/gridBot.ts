@@ -53,6 +53,7 @@ export async function launch() {
                 }
                 catch (error) {
                     console.log("Error while buying SOL:", error);
+                    await sleep(10000);
                 }
             }
         }
@@ -73,6 +74,7 @@ export async function launch() {
                 }
                 catch (error) {
                     console.log("Error while selling SOL :", error);
+                    await sleep(10000);
                 }
             }
         }
