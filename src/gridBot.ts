@@ -7,7 +7,10 @@ import fetch from 'cross-fetch'
 const express = require('express');
 const port = 3000;
 const variation: number = +process.env.DECIMAL_VARIATION;
-const solana = new Connection(process.env.SOLANA_RPC_URL);
+const solana = new Connection(process.env.SOLANA_RPC_URL, {
+    commitment: 'finalized',
+    wsEndpoint: process.env.SOLANA_WS_ENDPOINT,
+});
 var numberOfSells = 0;
 var numberOfBuys = 0;
 var amountOfSolToSell = 0;
@@ -144,7 +147,7 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
         var latestBlockHash = await solana.getLatestBlockhash();
         transaction.recentBlockhash = latestBlockHash.blockhash;
         transaction.feePayer = wallet.publicKey;
-        transaction.lastValidBlockHeight = latestBlockHash.height;
+        transaction.lastValidBlockHeight = latestBlockHash.lastValidBlockHeight;
         console.log("serializedTransaction:", serializedTransaction);
         console.log("transaction:", transaction);
         const txid = await solana.sendTransaction(transaction, [wallet.payer], {
