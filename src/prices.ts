@@ -23,6 +23,7 @@ export async function getSolanaPriceFor1SOL(): Promise<number> {
 
 
 export async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promise<[number, [any]]> {
+    amount = amount * LAMPORTS_PER_SOL;
     amount = parseInt(amount.toString());
     try {
         const { data } = await (
@@ -39,6 +40,7 @@ export async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promis
 }
 
 export async function getSolanaPriceAndBestRouteToBuySol(amount:number): Promise<[number, [any]]> {
+    amount = amount * DECIMALS_PER_USDC;
     amount = parseInt(amount.toString());
     try{
         const { data } = await (
