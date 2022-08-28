@@ -99,7 +99,12 @@ async function buySolana(route: any[], wallet:Wallet): Promise<void> {
     console.log("swapTransaction:", swapTransaction);
     console.log("cleanupTransaction:", cleanupTransaction);
 
-    await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+    try {
+        await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+    }
+    catch (error) {
+        return error;
+    }
 
     // Update the amount of USDC to use for next order
     amountOfUSDCToSell = await getAmountOfUSDCToSell(wallet, solana);
@@ -123,7 +128,12 @@ async function sellSolana(route: any[], wallet:Wallet): Promise<void> {
     console.log("swapTransaction:", swapTransaction);
     console.log("cleanupTransaction:", cleanupTransaction);
 
-    await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+    try {
+        await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+    }
+    catch (error) {
+        return error;
+    }
 
     // Update the amount of SOL to use for next order
     amountOfSolToSell = await getAmountSolToSell(wallet, solana);
