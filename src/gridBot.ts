@@ -132,7 +132,7 @@ async function createTransactions(route: any[], wallet:Wallet) {
         // user public key to be used for the swap
         userPublicKey: wallet.publicKey.toString(),
         // auto wrap and unwrap SOL. default is true
-        wrapUnwrapSOL: true 
+        wrapUnwrapSOL: false 
       })
     })
   ).json();
