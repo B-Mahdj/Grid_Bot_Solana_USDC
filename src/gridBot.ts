@@ -42,18 +42,17 @@ export async function launch() {
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
             if(amountOfUSDCToSell > 0){
                 console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
-                try {
-                    await buySolana(bestRoute, solanaWallet);
+                var failed:boolean = await buySolana(bestRoute, solanaWallet);
+                if(failed == true) {
+                    console.log("Failed to buy solana");
+                }
+                else {
                     // Delete the buy Order executed
                     buyOrders.splice(0, 1);
                     // Update the sell orders array with a new sell order at the start of the array
                     sellOrders.unshift(solanaPrice + ((variation) * solanaPrice));
                     // Sort the sellOrders in ascending order
                     sellOrders.sort((a, b) => a - b);
-                }
-                catch (error) {
-                    console.log("Error while buying SOL:", error);
-                    await sleep(10000);
                 }
             }
         }
@@ -63,18 +62,17 @@ export async function launch() {
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell);
             if(amountOfSolToSell > 0){
                 console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
-                try {
-                    await sellSolana(bestRoute, solanaWallet);
+                var failed:boolean = await sellSolana(bestRoute, solanaWallet);
+                if(failed == true) {
+                    console.log("Failed to sell solana");
+                }
+                else {
                     // Delete the sell order executed
                     sellOrders.splice(0, 1);
                     // Update the buy orders array with a new buy order at the start of the array
                     buyOrders.unshift(solanaPrice - ((variation) * solanaPrice));
                     // Sort the buyOrders in ascending order
                     buyOrders.sort((a, b) => a - b);
-                }
-                catch (error) {
-                    console.log("Error while selling SOL :", error);
-                    await sleep(10000);
                 }
             }
         }
@@ -83,7 +81,7 @@ export async function launch() {
     }
 }
 
-async function buySolana(route: any[], wallet:Wallet): Promise<void> {
+async function buySolana(route: any[], wallet:Wallet): Promise<boolean> {
     numberOfBuys++;
     console.log("Number of buys:", numberOfBuys);
 
@@ -103,16 +101,19 @@ async function buySolana(route: any[], wallet:Wallet): Promise<void> {
         await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
     }
     catch (error) {
-        return error;
+        console.log("Error while buying SOL", error);
+        return false;
     }
 
     // Update the amount of USDC to use for next order
     amountOfUSDCToSell = await getAmountOfUSDCToSell(wallet, solana);
 
+    return true;
+
 }
 
 
-async function sellSolana(route: any[], wallet:Wallet): Promise<void> {
+async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
     numberOfSells++;
     console.log("Number of sells:", numberOfSells);
 
@@ -132,11 +133,14 @@ async function sellSolana(route: any[], wallet:Wallet): Promise<void> {
         await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
     }
     catch (error) {
-        return error;
+        console.log("Error while selling SOL :", error);
+        return false;
     }
 
     // Update the amount of SOL to use for next order
     amountOfSolToSell = await getAmountSolToSell(wallet, solana);
+
+    return true;
 }
 
 
