@@ -14,7 +14,7 @@ export async function getSolanaPriceFor1SOL(): Promise<number> {
             )
         ).data;
         const routes = data;
-        return routes[0].outAmount / DECIMALS_PER_USDC;
+        return routes[0].outAmountWithSlippage / DECIMALS_PER_USDC;
     }
     catch (error) {
         console.log(error);
@@ -32,7 +32,7 @@ export async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promis
             )
         ).data;
         const routes = data;
-        return [(routes[0].outAmount / DECIMALS_PER_USDC), routes[0]];
+        return [(routes[0].outAmountWithSlippage / DECIMALS_PER_USDC), routes[0]];
     }
     catch (error) {
         console.log(error);
@@ -49,7 +49,7 @@ export async function getSolanaPriceAndBestRouteToBuySol(amount:number): Promise
             )
         ).data;
         const routes = data;
-        return [(routes[0].outAmount / LAMPORTS_PER_SOL), routes[0]];
+        return [(routes[0].outAmountWithSlippage / LAMPORTS_PER_SOL), routes[0]];
     } catch(e){
         console.log(e);
     }
