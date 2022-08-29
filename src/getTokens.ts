@@ -70,11 +70,14 @@ export async function getAmountSolToSell(wallet:Wallet, solanaConnection: Connec
   var wsolBalance = await getWSolBalance(wallet.publicKey.toString(),solanaConnection);
   console.log("WSol Balance", wsolBalance);
   var amountSolToSell = wsolBalance * +process.env.PERCENTAGE_OF_BALANCE_TO_SELL;
-  if(amountSolToSell < +process.env.MIN_AMOUNT_SOL_TO_SELL) {
-    return 0;
+  if(amountSolToSell > +process.env.MIN_AMOUNT_SOL_TO_SELL && amountSolToSell < +process.env.MAX_AMOUNT_SOL_TO_SELL) {
+    return amountSolToSell;
+  }
+  else if (amountSolToSell > +process.env.MAX_AMOUNT_SOL_TO_SELL) {
+    return +process.env.MAX_AMOUNT_SOL_TO_SELL;
   }
   else {
-    return amountSolToSell;
+    return 0;
   }
 }
 
@@ -83,10 +86,13 @@ export async function getAmountOfUSDCToSell(wallet:Wallet, solanaConnection: Con
   var usdcBalance = await getUSDCBalance(wallet.publicKey.toString(),solanaConnection);
   console.log("Usdc Balance", usdcBalance);
   var amountOfUSDCToSell = usdcBalance * +process.env.PERCENTAGE_OF_USDC_TO_SELL;
-  if(amountOfUSDCToSell < +process.env.MIN_AMOUNT_USDC_TO_SELL) {
-    return 0;
+  if(amountOfUSDCToSell > +process.env.MIN_AMOUNT_USDC_TO_SELL && amountOfUSDCToSell < +process.env.MAX_AMOUNT_USDC_TO_SELL) {
+    return amountOfUSDCToSell;
+  }
+  else if (amountOfUSDCToSell > +process.env.MAX_AMOUNT_USDC_TO_SELL) {
+    return +process.env.MAX_AMOUNT_SOL_TO_SELL;
   }
   else {
-    return amountOfUSDCToSell;
+    return 0;
   }
 }

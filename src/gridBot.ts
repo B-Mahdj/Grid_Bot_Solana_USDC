@@ -53,6 +53,7 @@ export async function launch() {
                     sellOrders.unshift(solanaPrice + ((variation) * solanaPrice));
                     // Sort the sellOrders in ascending order
                     sellOrders.sort((a, b) => a - b);
+                    console.log("Sell orders updated :", sellOrders);
                 }
             }
         }
@@ -73,6 +74,7 @@ export async function launch() {
                     buyOrders.unshift(solanaPrice - ((variation) * solanaPrice));
                     // Sort the buyOrders in ascending order
                     buyOrders.sort((a, b) => a - b);
+                    console.log("buyOrders updated are :", buyOrders);
                 }
             }
         }
@@ -109,9 +111,7 @@ async function buySolana(route: any[], wallet:Wallet): Promise<boolean> {
     amountOfUSDCToSell = await getAmountOfUSDCToSell(wallet, solana);
 
     return true;
-
 }
-
 
 async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
     numberOfSells++;
@@ -142,7 +142,6 @@ async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
 
     return true;
 }
-
 
 async function createTransactions(route: any[], wallet:Wallet) {
     // get serialized transactions for the swap
@@ -196,7 +195,6 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
         console.log(`https://solscan.io/tx/${txid}`);
     }
 }
-
 
 // Create sleep function
 export async function sleep(ms: number) {
