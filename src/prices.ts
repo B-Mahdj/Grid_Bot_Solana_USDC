@@ -54,3 +54,7 @@ export async function getSolanaPriceAndBestRouteToBuySol(amount:number): Promise
         console.log(e);
     }
 }
+
+export async function calculateProfit(buyPrice:number, sellPrice:number, amountOfSol:number): Promise<number> {
+    return (sellPrice - buyPrice) * amountOfSol;
+}

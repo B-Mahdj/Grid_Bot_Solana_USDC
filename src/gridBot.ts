@@ -1,7 +1,7 @@
 import { Wallet } from '@project-serum/anchor';
 import { Connection, Transaction } from '@solana/web3.js';
-import { getAmountSolToSell, getAmountOfUSDCToSell } from './getTokens';
-import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL } from './prices';
+import { getAmountOfUSDCToSell } from './getTokens';
+import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL, calculateProfit } from './prices';
 import { setup } from './setup';
 import fetch from 'cross-fetch'
 const express = require('express');
@@ -15,6 +15,7 @@ var numberOfSells = 0;
 var numberOfBuys = 0;
 var amountOfSolToSell = 0;
 var amountOfUSDCToSell = 0;
+var positionTaken:number[] = [];
 
 const app = express();
 app.listen(port, () => console.log(`App listening on port ${port}!`));
@@ -23,7 +24,7 @@ launch();
 export async function launch() {
     const { solanaWallet, orders } = await setup();
     console.log("Solana wallet:", solanaWallet.publicKey.toString());
-    amountOfSolToSell = await getAmountSolToSell(solanaWallet, solana);
+    amountOfSolToSell = 0;
     amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
     console.log("Amount of sol to sell:", amountOfSolToSell);
     console.log("Amount of USDC to sell:", amountOfUSDCToSell);
@@ -51,9 +52,14 @@ export async function launch() {
                     buyOrders.splice(0, 1);
                     // Update the sell orders array with a new sell order at the start of the array
                     sellOrders.unshift(solanaPrice + ((variation) * solanaPrice));
-                    // Sort the sellOrders in descending orders
-                    sellOrders.sort(function (a, b) { return b - a });
+                    // Sort the sellOrders in ascending orders
+                    sellOrders.sort(function(a, b){return a-b});
                     console.log("Sell orders updated :", sellOrders);
+                    // Update the positionTaken array with the new position
+                    positionTaken.unshift(solanaPrice);
+                    console.log("Position taken updated :", positionTaken);
+                    // Update the amount of SOL to sell for next order
+                    amountOfSolToSell = price;
                 }
             }
         }
@@ -68,6 +74,10 @@ export async function launch() {
                     console.log("Failed to sell solana");
                 }
                 else {
+                    // Calculate the profit of the sell order
+                    var profit = await calculateProfit(positionTaken[0], solanaPrice, amountOfSolToSell);
+                    console.log("Profit from this sell order is (without fees) is:", profit);
+                    positionTaken.splice(0, 1);
                     // Delete the sell order executed
                     sellOrders.splice(0, 1);
                     // Update the buy orders array with a new buy order at the start of the array
@@ -138,7 +148,7 @@ async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
     }
 
     // Update the amount of SOL to use for next order
-    amountOfSolToSell = await getAmountSolToSell(wallet, solana);
+    amountOfSolToSell = 0;
 
     return true;
 }
