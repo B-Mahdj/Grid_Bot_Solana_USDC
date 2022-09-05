@@ -41,7 +41,7 @@ export async function launch() {
         // If the price is equals or below the lowest buy order inside the array, buy the coin
         if (solanaPrice <= buyOrders[0]) {
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
-            if(amountOfUSDCToSell > 0){
+            if(amountOfUSDCToSell > 0 && positionTaken.length !== 0){
                 console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
                 var failed:boolean = await buySolana(bestRoute, solanaWallet);
                 if(failed == true) {
@@ -76,7 +76,7 @@ export async function launch() {
                 else {
                     // Calculate the profit of the sell order
                     var profit = await calculateProfit(positionTaken[0], solanaPrice, amountOfSolToSell);
-                    console.log("Profit from this sell order is (without fees) is:", profit);
+                    console.log("Profit from this sell order (without fees) is:", profit);
                     positionTaken.splice(0, 1);
                     // Delete the sell order executed
                     sellOrders.splice(0, 1);
@@ -119,6 +119,7 @@ async function buySolana(route: any[], wallet:Wallet): Promise<boolean> {
 
     // Update the amount of USDC to use for next order
     amountOfUSDCToSell = await getAmountOfUSDCToSell(wallet, solana);
+    console.log("Amount of USDC to sell updated is :", amountOfUSDCToSell);
 
     return true;
 }
@@ -146,9 +147,6 @@ async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
         console.log("Error while selling SOL :", error);
         return false;
     }
-
-    // Update the amount of SOL to use for next order
-    amountOfSolToSell = 0;
 
     return true;
 }
