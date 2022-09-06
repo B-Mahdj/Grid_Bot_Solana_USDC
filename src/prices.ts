@@ -3,9 +3,10 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 require('dotenv').config();
 const slippage = +process.env.SLIPPAGE;
 const DECIMALS_PER_USDC = +process.env.DECIMALS_PER_USDC;
+import { manage_axios_error } from './error_handling';
 
 export async function getSolanaPriceFor1SOL(): Promise<number> {
-    var amount = LAMPORTS_PER_SOL;
+    let amount = LAMPORTS_PER_SOL;
     amount = parseInt(amount.toString());
     try { 
         const { data } = await (
@@ -17,7 +18,7 @@ export async function getSolanaPriceFor1SOL(): Promise<number> {
         return routes[0].outAmountWithSlippage / DECIMALS_PER_USDC;
     }
     catch (error) {
-        console.log(error);
+        manage_axios_error(error);
     }
 }
 
@@ -35,7 +36,7 @@ export async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promis
         return [(routes[0].outAmountWithSlippage / DECIMALS_PER_USDC), routes[0]];
     }
     catch (error) {
-        console.log(error);
+        manage_axios_error(error);
     }
 }
 
@@ -50,8 +51,8 @@ export async function getSolanaPriceAndBestRouteToBuySol(amount:number): Promise
         ).data;
         const routes = data;
         return [(routes[0].outAmountWithSlippage / LAMPORTS_PER_SOL), routes[0]];
-    } catch(e){
-        console.log(e);
+    } catch(error){
+        manage_axios_error(error);
     }
 }
 

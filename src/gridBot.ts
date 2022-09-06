@@ -43,8 +43,8 @@ export async function launch() {
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
             if(amountOfUSDCToSell > 0){
                 console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
-                var failed:boolean = await buySolana(bestRoute, solanaWallet);
-                if(failed == true) {
+                let success = await buySolana(bestRoute, solanaWallet);
+                if(!success) {
                     console.log("Failed to buy solana");
                 }
                 else {
@@ -69,8 +69,8 @@ export async function launch() {
             if(amountOfSolToSell > 0 && positionTaken.length !== 0){
                 const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell);
                 console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
-                var failed:boolean = await sellSolana(bestRoute, solanaWallet);
-                if(failed == true) {
+                let success:boolean = await sellSolana(bestRoute, solanaWallet);
+                if(!success) {
                     console.log("Failed to sell solana");
                 }
                 else {
@@ -98,8 +98,8 @@ async function buySolana(route: any[], wallet:Wallet): Promise<boolean> {
     console.log("Number of buys:", numberOfBuys);
 
     // Make the buy order
-    var transactions = await createTransactions(route, wallet);
-    var setupTransaction, swapTransaction, cleanupTransaction;
+    let transactions = await createTransactions(route, wallet);
+    let setupTransaction, swapTransaction, cleanupTransaction;
     if(transactions.setupTransaction !== undefined){    setupTransaction = transactions.setupTransaction;    }
     if(transactions.swapTransaction !== undefined){    swapTransaction = transactions.swapTransaction;    }
     if(transactions.cleanupTransaction !== undefined){    cleanupTransaction = transactions.cleanupTransaction;    }
@@ -173,11 +173,11 @@ async function createTransactions(route: any[], wallet:Wallet) {
     return transactions;
 }
 
-async function executeTransactions (setupTransaction:string, swapTransaction: string, cleanupTransaction: string, wallet:Wallet): Promise<void> {
+async function executeTransactions (setupTransaction:string, swapTransaction: string, cleanupTransaction: string, wallet:Wallet): Promise<any> {
     for(let serializedTransaction of [setupTransaction, swapTransaction, cleanupTransaction].filter(Boolean)){
         // get transaction object from serialized transaction
         const transaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
-        var latestBlockHash = await solana.getLatestBlockhash();
+        let latestBlockHash = await solana.getLatestBlockhash();
         transaction.recentBlockhash = latestBlockHash.blockhash;
         transaction.feePayer = wallet.publicKey;
         transaction.lastValidBlockHeight = latestBlockHash.lastValidBlockHeight;
@@ -194,13 +194,17 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
         });
         // Make sure the transaction is confirmed and not failed 
         const confirmedTransaction = await solana.getTransaction(txid);
-        console.log("confirmedTransaction:", confirmedTransaction);
-        if(confirmedTransaction.meta.err !== null){
+        if(confirmedTransaction == null || confirmedTransaction.meta !== null || confirmedTransaction.meta.err !== null){
             console.log("Transaction failed");
             console.log("confirmedTransaction.meta.err:", confirmedTransaction.meta.err);
             throw new Error("Transaction failed with error: " + confirmedTransaction.meta.err);
         }
         console.log(`https://solscan.io/tx/${txid}`);
+        if(confirmedTransaction !== null){
+            console.log("confirmedTransaction:", confirmedTransaction);
+            return confirmedTransaction;
+        }
+        return null;
     }
 }
 
