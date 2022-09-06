@@ -39,7 +39,6 @@ export async function launch() {
         console.log("price: " + solanaPrice);
 
         // If the price is equals or below the lowest buy order inside the array, buy the coin
-        console.log("Is solana price below first buy orders:", solanaPrice <= buyOrders[0]);
         if (solanaPrice <= buyOrders[0]) {
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
             if(amountOfUSDCToSell > 0){
@@ -65,7 +64,6 @@ export async function launch() {
             }
         }
 
-        console.log("Is solana price above first sell orders:", solanaPrice >= sellOrders[0]);
         // If the price is equals or above the lowest sell order, sell the coin
         if (solanaPrice >= sellOrders[0]) {
             if(amountOfSolToSell > 0 && positionTaken.length !== 0){
