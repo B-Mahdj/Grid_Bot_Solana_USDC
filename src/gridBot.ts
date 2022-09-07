@@ -194,10 +194,9 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
         });
         // Make sure the transaction is confirmed and not failed 
         const confirmedTransaction = await solana.getTransaction(txid);
-        if(confirmedTransaction == null || confirmedTransaction.meta !== null || confirmedTransaction.meta.err !== null){
+        if(confirmedTransaction == null || confirmedTransaction.meta == null || confirmedTransaction.meta.err !== null){
             console.log("Transaction failed");
-            console.log("confirmedTransaction.meta.err:", confirmedTransaction.meta.err);
-            throw new Error("Transaction failed with error: " + confirmedTransaction.meta.err);
+            throw new Error("confirmedTransaction failed : " + confirmedTransaction);
         }
         console.log(`https://solscan.io/tx/${txid}`);
         if(confirmedTransaction !== null){

@@ -49,7 +49,7 @@ async function getSolInitialInfo() {
     }
 }
 
-async function getSolanaWallet(){
+export async function getSolanaWallet(){
     //Create a Uint8Array from process.env.SOLANA_ACCOUNT_SECRET_KEY
     var secretKeyJSON = process.env.SOLANA_ACCOUNT_SECRET_KEY.split(',');
     var secretKeyJSONToNumber = secretKeyJSON.map(str => {

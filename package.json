@@ -4,16 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx ts-node src/gridBot.ts"
+    "start": "npx ts-node src/gridBot.ts",
+    "cashout_all": "npx ts-node scripts/move_SOL_to_main.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@project-serum/anchor": "^0.25.0",
-    "@solana/spl-token": "^0.3.1",
+    "@solana/spl-token": "^0.3.4",
     "@solana/web3.js": "^1.53.0",
     "axios": "^0.27.2",
+    "bs58": "^5.0.0",
     "cross-fetch": "^3.1.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1"
