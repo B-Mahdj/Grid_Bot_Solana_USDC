@@ -25,14 +25,16 @@ async function createInitialBuyAndSellOrders(){
     console.log("Creating orders...");
     for(let i = 1; i <= NUMBER_OF_ORDERS_TO_CREATE; i++){
         console.log("Creating buy order no. ", i);
-        console.log("Buy order equals : ", initialPrice - ((variation*i) * initialPrice));
         let buyOrder:number = initialPrice - ((variation*i) * initialPrice);
+        buyOrder = +buyOrder.toFixed(4);
+        console.log("Buy order equals : ", buyOrder);
         buyOrders.push(buyOrder);
     }
     for(let i = 1; i <= NUMBER_OF_ORDERS_TO_CREATE; i++){
         console.log("Creating sell order no. ", i);
-        console.log("Sell order equals : ", initialPrice + ((variation*i) * initialPrice));
-        let sellOrder = initialPrice + ((variation*i) * initialPrice);
+        let sellOrder:number = initialPrice + ((variation*i) * initialPrice);
+        sellOrder = +sellOrder.toFixed(4);
+        console.log("Sell order equals : ", sellOrder);
         sellOrders.push(sellOrder);
     }
     return {buyOrders, sellOrders};
