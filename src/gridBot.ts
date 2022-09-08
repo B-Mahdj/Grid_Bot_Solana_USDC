@@ -187,11 +187,13 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
             skipPreflight: true
         });
         console.log("Waiting for solana to confirm transaction:", txid);
-        await solana.confirmTransaction({
+        const resultOfConfirmation = await solana.confirmTransaction({
             blockhash: latestBlockHash.blockhash,
             lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
             signature: txid,
         });
+        // Print all elements in the result of the confirmation
+        console.log("Result of confirmation:", resultOfConfirmation);
         // Make sure the transaction is confirmed and not failed 
         const confirmedTransaction = await solana.getTransaction(txid);
         if(confirmedTransaction == null || confirmedTransaction.meta == null || confirmedTransaction.meta.err !== null){

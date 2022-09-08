@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npx ts-node src/gridBot.ts",
-    "cashout_all": "npx ts-node scripts/move_SOL_to_main.ts"
+    "cashout_all_SOL": "npx ts-node scripts/move_SOL_to_main.ts"
   },
   "keywords": [],
   "author": "",
