@@ -8,6 +8,8 @@ const connection = new Connection(process.env.SOLANA_RPC_URL, {
     wsEndpoint: process.env.SOLANA_WS_ENDPOINT,
 });
 
+move_all_wsol_to_main_account();
+
 async function move_all_wsol_to_main_account() {
 
     var secretKeyJSON = process.env.SOLANA_ACCOUNT_SECRET_KEY.split(',');
@@ -20,7 +22,6 @@ async function move_all_wsol_to_main_account() {
     const fromAddress = "5CJCHjV5DyzJyN75PuQqJrHNxKhFo1PTgrbuBjQ8anXX";
     const toAddress = "DYFsKBpkL2RRUPfKow6yzyA3smSHN37UKXSqEbXqLd2y";
     const tokenAddress = "So11111111111111111111111111111111111111112";
-
 
     const fromPublicKey = new PublicKey(fromAddress);
     const toPublicKey = new PublicKey(toAddress);
@@ -41,16 +42,18 @@ async function move_all_wsol_to_main_account() {
         toPublicKey,
     );
 
+    const amountOfWSolToTransfer = await getWSolBalance(new Wallet(fromWallet).publicKey.toString(), connection) * LAMPORTS_PER_SOL;
+
     const signature = await transfer(
         connection,
         fromWallet,
         fromTokenAccount.address,
         toTokenAccount.address,
         fromWallet.publicKey, // or pass fromPublicKey
-        await getWSolBalance(new Wallet(fromWallet).publicKey.toString(), connection) * LAMPORTS_PER_SOL
+        amountOfWSolToTransfer,
+        undefined,
+        { skipPreflight : true}
     );
 
     console.log(`https://solscan.io/tx/${signature}`);
 }
-
-move_all_wsol_to_main_account();
