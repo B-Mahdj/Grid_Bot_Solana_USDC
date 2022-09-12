@@ -1,5 +1,5 @@
 import { Wallet } from '@project-serum/anchor';
-import { Connection, Transaction } from '@solana/web3.js';
+import { BlockhashWithExpiryBlockHeight, Connection, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getAmountSolToSell, getAmountOfUSDCToSell } from './getTokens';
 import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL } from './prices';
 import { setup } from './setup';
@@ -7,6 +7,7 @@ import fetch from 'cross-fetch'
 const express = require('express');
 const port = 3000;
 const variation: number = +process.env.DECIMAL_VARIATION;
+const MAX_NUMBER_OF_TRIES = 5;
 const solana = new Connection(process.env.SOLANA_RPC_URL, {
     commitment: 'finalized',
     wsEndpoint: process.env.SOLANA_WS_ENDPOINT,
@@ -54,6 +55,9 @@ export async function launch() {
                     // Sort the sellOrders in descending orders
                     sellOrders.sort(function (a, b) { return b - a });
                     console.log("Sell orders updated :", sellOrders);
+                    // Update the amount of USDC to use for next order
+                    amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
+                    console.log("Amount of USDC to sell:", amountOfUSDCToSell);
                 }
             }
         }
@@ -75,6 +79,9 @@ export async function launch() {
                     // Sort the buyOrders in descending order
                     buyOrders.sort(function (a, b) { return b - a });
                     console.log("buyOrders updated are :", buyOrders);
+                    // Update the amount of SOL to use for next order
+                    amountOfSolToSell = await getAmountSolToSell(solanaWallet, solana);
+                    console.log("Amount of SOL to sell:", amountOfSolToSell);
                 }
             }
         }
@@ -100,17 +107,12 @@ async function buySolana(route: any[], wallet:Wallet): Promise<boolean> {
     console.log("cleanupTransaction:", cleanupTransaction);
 
     try {
-        await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+        return await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
     }
     catch (error) {
         console.log("Error while buying SOL", error);
         return false;
     }
-
-    // Update the amount of USDC to use for next order
-    amountOfUSDCToSell = await getAmountOfUSDCToSell(wallet, solana);
-
-    return true;
 }
 
 async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
@@ -130,17 +132,12 @@ async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
     console.log("cleanupTransaction:", cleanupTransaction);
 
     try {
-        await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+        return await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
     }
     catch (error) {
         console.log("Error while selling SOL :", error);
         return false;
     }
-
-    // Update the amount of SOL to use for next order
-    amountOfSolToSell = await getAmountSolToSell(wallet, solana);
-
-    return true;
 }
 
 async function createTransactions(route: any[], wallet:Wallet) {
@@ -165,7 +162,7 @@ async function createTransactions(route: any[], wallet:Wallet) {
     return transactions;
 }
 
-async function executeTransactions (setupTransaction:string, swapTransaction: string, cleanupTransaction: string, wallet:Wallet): Promise<void> {
+async function executeTransactions (setupTransaction:string, swapTransaction: string, cleanupTransaction: string, wallet:Wallet): Promise<boolean> {
     for(let serializedTransaction of [setupTransaction, swapTransaction, cleanupTransaction].filter(Boolean)){
         // get transaction object from serialized transaction
         const transaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
@@ -175,24 +172,54 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
         transaction.lastValidBlockHeight = latestBlockHash.lastValidBlockHeight;
         console.log("serializedTransaction:", serializedTransaction);
         console.log("transaction:", transaction);
-        const txid = await solana.sendTransaction(transaction, [wallet.payer], {
-            skipPreflight: true
-        });
+        const txid = await sendAndConfirmTransaction(solana, transaction, [wallet.payer]);
         console.log("Waiting for solana to confirm transaction:", txid);
-        await solana.confirmTransaction({
-            blockhash: latestBlockHash.blockhash,
-            lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-            signature: txid,
-        });
-        // Make sure the transaction is confirmed and not failed 
-        const confirmedTransaction = await solana.getTransaction(txid);
-        console.log("confirmedTransaction:", confirmedTransaction);
-        if(confirmedTransaction.meta.err !== null){
-            console.log("Transaction failed");
-            console.log("confirmedTransaction.meta.err:", confirmedTransaction.meta.err);
-            throw new Error("Transaction failed with error: " + confirmedTransaction.meta.err);
+        return await waitForConfirmation(txid, latestBlockHash);
+    }
+}
+
+async function waitForConfirmation(txid: string, latestBlockHash:BlockhashWithExpiryBlockHeight): Promise<boolean> {
+    const resultOfConfirmation = await solana.confirmTransaction({
+        blockhash: latestBlockHash.blockhash,
+        lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+        signature: txid,
+    });
+    console.log("Result of confirmation:", resultOfConfirmation);
+    console.log("Result of confirmation signature result: ", resultOfConfirmation.value);
+
+    // Make sure the transaction is "pushed" on the blockchain
+    let transactionConfirmed = false;
+    let numberOfTry = 0;
+    let transaction;
+    while(transactionConfirmed === false && numberOfTry < MAX_NUMBER_OF_TRIES){
+        numberOfTry++;
+        let transaction = await solana.getTransaction(txid);
+        if(transaction == null){
+            await sleep(3000);
         }
-        console.log(`https://solscan.io/tx/${txid}`);
+        else {
+            transactionConfirmed = true;
+        }
+    }
+
+    // Make sure the transaction is not failed
+    if (transactionConfirmed){
+        if(transaction.meta == null){
+            console.log("Transaction failed", transaction);
+            return false;
+        }
+        else if (transaction.meta.err != null){
+            console.log("Transaction failed with erros:", transaction.meta.err);
+            return false;
+        }
+        else{
+            console.log("confirmedTransaction:", transaction);
+            console.log(`https://solscan.io/tx/${txid}`);
+            return true;
+        }
+    }
+    else {
+        return false;
     }
 }
 
