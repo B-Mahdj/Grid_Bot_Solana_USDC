@@ -189,7 +189,7 @@ async function executeTransactions (setupTransaction:string, swapTransaction: st
 }
 
 async function waitForConfirmation(txid: string, latestBlockHash:BlockhashWithExpiryBlockHeight): Promise<boolean> {
-    const resultOfConfirmation = await solana.confirmTransaction({
+    let resultOfConfirmation = await solana.confirmTransaction({
         blockhash: latestBlockHash.blockhash,
         lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
         signature: txid,
@@ -200,11 +200,14 @@ async function waitForConfirmation(txid: string, latestBlockHash:BlockhashWithEx
     // Make sure the transaction is "pushed" on the blockchain
     let transactionConfirmed = false;
     let numberOfTry = 0;
-    let transaction;
     while(transactionConfirmed === false && numberOfTry < MAX_NUMBER_OF_TRIES){
         numberOfTry++;
-        let transaction = await solana.getTransaction(txid);
-        if(transaction == null){
+        resultOfConfirmation = await solana.confirmTransaction({
+            blockhash: latestBlockHash.blockhash,
+            lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+            signature: txid,
+        });
+        if(resultOfConfirmation == null){
             await sleep(3000);
         }
         else {
@@ -214,16 +217,12 @@ async function waitForConfirmation(txid: string, latestBlockHash:BlockhashWithEx
 
     // Make sure the transaction is not failed
     if (transactionConfirmed){
-        if(transaction.meta == null){
-            console.log("Transaction failed", transaction);
-            return false;
-        }
-        else if (transaction.meta.err != null){
-            console.log("Transaction failed with erros:", transaction.meta.err);
+        if (resultOfConfirmation.value.err != null){
+            console.log("Transaction failed with erros:", resultOfConfirmation.value.err);
             return false;
         }
         else{
-            console.log("confirmedTransaction:", transaction);
+            console.log("confirmedTransaction:", resultOfConfirmation);
             console.log(`https://solscan.io/tx/${txid}`);
             return true;
         }
