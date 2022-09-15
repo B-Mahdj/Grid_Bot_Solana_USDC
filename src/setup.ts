@@ -2,7 +2,7 @@ require('dotenv').config();
 import { Keypair } from "@solana/web3.js";
 import { Wallet } from '@project-serum/anchor';
 import { default as axios } from 'axios';
-const NUMBER_OF_ORDERS_TO_CREATE = 5;
+const NUMBER_OF_ORDERS_TO_CREATE = 10;
 
 export async function setup(){
     const solanaWallet = await getSolanaWallet();
