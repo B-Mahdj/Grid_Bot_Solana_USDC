@@ -51,6 +51,7 @@ export async function launch() {
                 else {
                     // Delete the buy Order executed
                     buyOrders.splice(0, 1);
+                    console.log("Buy order updated:", buyOrders);
                     // Update the sell orders array with a new sell order at the start of the array
                     sellOrders.unshift(solanaPrice + ((variation) * solanaPrice));
                     // Sort the sellOrders in ascending orders
@@ -83,8 +84,10 @@ export async function launch() {
                     var profit = await calculateProfit(positionTaken[0], solanaPrice, amountOfSolToSell);
                     console.log("Profit from this sell order (without fees) is:", profit);
                     positionTaken.splice(0, 1);
+                    console.log("Position taken updated :", positionTaken);
                     // Delete the sell order executed
                     sellOrders.splice(0, 1);
+                    console.log("Sell orders updated :", sellOrders);
                     // Update the buy orders array with a new buy order at the start of the array
                     buyOrders.unshift(solanaPrice - ((variation) * solanaPrice));
                     // Sort the buyOrders in descending order
