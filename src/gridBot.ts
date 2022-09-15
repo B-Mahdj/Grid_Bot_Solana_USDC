@@ -72,7 +72,6 @@ export async function launch() {
 
         // If the price is equals or above the lowest sell order, sell the coin
         if (solanaPrice >= sellOrders[0]) {
-            console.log("Price, " + solanaPrice + " is higher than the lowest sell order, " + sellOrders[0]);
             if(amountOfSolToSell > 0 && positionTaken.length !== 0){
                 const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell);
                 console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
