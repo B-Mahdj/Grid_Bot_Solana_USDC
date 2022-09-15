@@ -37,10 +37,10 @@ export async function launch() {
     while (true) {
         // Get the actual price of 1 SOL vs USDC
         var solanaPrice = +(await getSolanaPriceFor1SOL()).toFixed(4);
-        console.log("price: " + solanaPrice);
 
         // If the price is equals or below the lowest buy order inside the array, buy the coin
         if (solanaPrice <= buyOrders[0]) {
+            console.log("Price, " + solanaPrice + " is lower than the lowest buy order, " + buyOrders[0]);
             const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
             if(amountOfUSDCToSell > 0){
                 console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
@@ -72,6 +72,7 @@ export async function launch() {
 
         // If the price is equals or above the lowest sell order, sell the coin
         if (solanaPrice >= sellOrders[0]) {
+            console.log("Price, " + solanaPrice + " is higher than the lowest sell order, " + sellOrders[0]);
             if(amountOfSolToSell > 0 && positionTaken.length !== 0){
                 const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell);
                 console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
@@ -102,8 +103,6 @@ export async function launch() {
 }
 
 async function buySolana(route: any[], wallet:Wallet): Promise<boolean> {
-    numberOfBuys++;
-    console.log("Number of buys:", numberOfBuys);
 
     // Make the buy order
     let transactions = await createTransactions(route, wallet);
@@ -118,7 +117,12 @@ async function buySolana(route: any[], wallet:Wallet): Promise<boolean> {
     console.log("cleanupTransaction:", cleanupTransaction);
 
     try {
-        return await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+        let success:boolean = await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+        if(success){
+            numberOfBuys++;
+            console.log("Number of buys:", numberOfBuys);
+        }
+        return success;
     }
     catch (error) {
         console.log("Error while buying SOL", error);
@@ -127,9 +131,6 @@ async function buySolana(route: any[], wallet:Wallet): Promise<boolean> {
 }
 
 async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
-    numberOfSells++;
-    console.log("Number of sells:", numberOfSells);
-
     // Make the sell order
     var transactions = await createTransactions(route, wallet);
     var setupTransaction, swapTransaction, cleanupTransaction;
@@ -143,7 +144,12 @@ async function sellSolana(route: any[], wallet:Wallet): Promise<boolean> {
     console.log("cleanupTransaction:", cleanupTransaction);
 
     try {
-        return await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+        let success:boolean =  await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+        if(success){
+            numberOfSells++;
+            console.log("Number of sells:", numberOfSells);
+        }
+        return success;
     }
     catch (error) {
         console.log("Error while selling SOL :", error);
