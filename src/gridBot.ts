@@ -119,9 +119,7 @@ async function buySolana(route: any[], wallet: Wallet): Promise<boolean> {
     if (transactions.cleanupTransaction !== undefined) { cleanupTransaction = transactions.cleanupTransaction; }
 
     console.log("Transaction for buying : ");
-    console.log("setupTransaction:", setupTransaction);
     console.log("swapTransaction:", swapTransaction);
-    console.log("cleanupTransaction:", cleanupTransaction);
 
     try {
         let success: boolean = await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
@@ -194,8 +192,7 @@ async function executeTransactions(setupTransaction: string, swapTransaction: st
         transaction.recentBlockhash = latestBlockHash.blockhash;
         transaction.feePayer = wallet.publicKey;
         transaction.lastValidBlockHeight = latestBlockHash.lastValidBlockHeight;
-        console.log("serializedTransaction:", serializedTransaction);
-        console.log("transaction:", transaction);
+        console.log("Transaction created");
         const txid = await sendAndConfirmTransaction(solana, transaction, [wallet.payer]);
         console.log("txid:", txid);
         // MAYBE TO DELETE :
