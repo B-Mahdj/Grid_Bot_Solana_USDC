@@ -13,7 +13,7 @@ const solana = new Connection(process.env.SOLANA_RPC_URL, {
 });
 var numberOfSells = 0;
 var numberOfBuys = 0;
-var amountOfSolToSell = 0;
+var amountOfSolToSell:number[] = [];
 var amountOfUSDCToSell = 0;
 var positionTaken:number[] = [];
 const MAX_NUMBER_OF_TRIES = 5;
@@ -25,7 +25,6 @@ launch();
 export async function launch() {
     const { solanaWallet, orders } = await setup();
     console.log("Solana wallet:", solanaWallet.publicKey.toString());
-    amountOfSolToSell = 0;
     amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
     console.log("Amount of sol to sell:", amountOfSolToSell);
     console.log("Amount of USDC to sell:", amountOfUSDCToSell);
@@ -66,7 +65,7 @@ export async function launch() {
                     positionTaken.unshift(solanaPrice);
                     console.log("Position taken updated :", positionTaken);
                     // Update the amount of SOL to sell for next order
-                    amountOfSolToSell = price;
+                    amountOfSolToSell.unshift(price);
                     console.log("Amount of sol to sell updated :", amountOfSolToSell);
                     // Update the amount of USDC to use for next order
                     amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
@@ -77,16 +76,16 @@ export async function launch() {
 
         // If the price is equals or above the lowest sell order, sell the coin
         if (solanaPrice >= sellOrders[0]) {
-            if(amountOfSolToSell > 0 && positionTaken.length !== 0){
-                const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell);
-                console.log("Using " + amountOfSolToSell + " SOL to buy " + price + " USDC");
+            if(amountOfSolToSell.length != 0 && amountOfSolToSell[0] > 0 && positionTaken.length !== 0){
+                const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell[0]);
+                console.log("Using " + amountOfSolToSell[0] + " SOL to buy " + price + " USDC");
                 let success:boolean = await sellSolana(bestRoute, solanaWallet);
                 if(!success) {
                     console.log("Failed to sell solana");
                 }
                 else {
                     // Calculate the profit of the sell order
-                    var profit = await calculateProfit(positionTaken[0], solanaPrice, amountOfSolToSell);
+                    var profit = await calculateProfit(positionTaken[0], solanaPrice, amountOfSolToSell[0]);
                     console.log("Profit from this sell order (without fees) is:", profit);
                     positionTaken.splice(0, 1);
                     console.log("Position taken updated :", positionTaken);
@@ -98,6 +97,8 @@ export async function launch() {
                     // Sort the buyOrders in descending order
                     buyOrders.sort(function (a, b) { return b - a });
                     console.log("buyOrders updated are :", buyOrders);
+                    // Update the amount of SOL to sell for next order
+                    amountOfSolToSell.splice(0, 1);
                     console.log("Amount of sol to sell:", amountOfSolToSell);
                     console.log("Amount of USDC to sell:", amountOfUSDCToSell);
                 }
