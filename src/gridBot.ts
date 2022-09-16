@@ -38,6 +38,11 @@ export async function launch() {
         // Get the actual price of 1 SOL vs USDC
         var solanaPrice = +(await getSolanaPriceFor1SOL()).toFixed(4);
 
+        // Every 1 hour : print the price 
+        setInterval(function () {
+            console.log("Price of 1 SOL:", solanaPrice);
+        }, 3600000);
+
         // If the price is equals or below the lowest buy order inside the array, buy the coin
         if (solanaPrice <= buyOrders[0]) {
             console.log("Price, " + solanaPrice + " is lower than the lowest buy order, " + buyOrders[0]);
@@ -93,6 +98,8 @@ export async function launch() {
                     // Sort the buyOrders in descending order
                     buyOrders.sort(function (a, b) { return b - a });
                     console.log("buyOrders updated are :", buyOrders);
+                    console.log("Amount of sol to sell:", amountOfSolToSell);
+                    console.log("Amount of USDC to sell:", amountOfUSDCToSell);
                 }
             }
         }
