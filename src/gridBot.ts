@@ -143,10 +143,9 @@ async function sellSolana(route: any[], wallet: Wallet): Promise<boolean> {
     if (transactions.swapTransaction !== undefined) { swapTransaction = transactions.swapTransaction; }
     if (transactions.cleanupTransaction !== undefined) { cleanupTransaction = transactions.cleanupTransaction; }
 
-    console.log("Transaction for selling : ");
-    console.log("setupTransaction:", setupTransaction);
+    //console.log("setupTransaction:", setupTransaction);
     console.log("swapTransaction:", swapTransaction);
-    console.log("cleanupTransaction:", cleanupTransaction);
+    //console.log("cleanupTransaction:", cleanupTransaction);
 
     try {
         let success: boolean = await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
