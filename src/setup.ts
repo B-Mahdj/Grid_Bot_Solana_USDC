@@ -40,7 +40,7 @@ async function createInitialBuyAndSellOrders(){
     return {buyOrders, sellOrders};
 }
 
-async function getSolInitialInfo() {
+export async function getSolInitialInfo() {
     try { 
         const solInfo = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true`);
         console.log("Solana initial Info : ", solInfo.data);
