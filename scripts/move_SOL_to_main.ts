@@ -27,6 +27,7 @@ async function move_all_wsol_to_main_account() {
     const toPublicKey = new PublicKey(toAddress);
     const tokenPublicKey = new PublicKey(tokenAddress);
 
+    const amountOfWSolToTransfer = await getWSolBalance(new Wallet(fromWallet).publicKey.toString(), connection) * LAMPORTS_PER_SOL;
 
     const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
         connection,
@@ -41,8 +42,6 @@ async function move_all_wsol_to_main_account() {
         tokenPublicKey,
         toPublicKey,
     );
-
-    const amountOfWSolToTransfer = await getWSolBalance(new Wallet(fromWallet).publicKey.toString(), connection) * LAMPORTS_PER_SOL;
 
     const signature = await transfer(
         connection,
