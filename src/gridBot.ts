@@ -36,6 +36,10 @@ export async function launch() {
     setInterval(async function () {
         console.log("Price of 1 SOL:", +(await getSolanaPriceFor1SOL()).toFixed(4));
     }, 3600000);
+    //Every 30 minutes, update the amount of USDC to sell
+    setInterval(async function () {
+        amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
+    }, 1800000);
 
     let solanaInitialInfo = await getSolInitialInfo();
     if(solanaInitialInfo.usd_24h_change < 0){
@@ -63,9 +67,9 @@ export async function launch() {
 }
 
 async function buyAction(solanaPrice: number, buyOrders: number[], sellOrders: number[], solanaWallet: Wallet): Promise<void> {
-    console.log("Price, " + solanaPrice + " is lower than the lowest buy order, " + buyOrders[0]);
-    const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
-    if (amountOfUSDCToSell > 0) {
+    if (amountOfUSDCToSell > 0) {   
+        console.log("Price, " + solanaPrice + " is lower than the lowest buy order, " + buyOrders[0]);
+        const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
         console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
         let success = await buySolana(bestRoute, solanaWallet);
         if (!success) {
@@ -95,6 +99,7 @@ async function buyAction(solanaPrice: number, buyOrders: number[], sellOrders: n
 
 async function sellAction(solanaPrice: number, buyOrders: number[], sellOrders: number[], solanaWallet: Wallet): Promise<void> {
     if (amountOfSolToSell.length != 0 && amountOfSolToSell[0] > 0 && positionTaken.length !== 0) {
+        console.log("Price, " + solanaPrice + " is higher than the lowest sell order, " + sellOrders[0]);
         const [price, bestRoute] = await getSolanaPriceAndBestRouteToSellSol(amountOfSolToSell[0]);
         console.log("Using " + amountOfSolToSell[0] + " SOL to buy " + price + " USDC");
         let success: boolean = await sellSolana(bestRoute, solanaWallet);
@@ -118,6 +123,8 @@ async function sellAction(solanaPrice: number, buyOrders: number[], sellOrders: 
             // Update the amount of SOL to sell for next order
             amountOfSolToSell.splice(0, 1);
             console.log("Amount of sol to sell:", amountOfSolToSell);
+            // Update the amount of USDC to use for next order
+            amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
             console.log("Amount of USDC to sell:", amountOfUSDCToSell);
         }
     }
