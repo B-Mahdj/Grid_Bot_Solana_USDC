@@ -44,13 +44,13 @@ export async function launch() {
     let solanaInitialInfo = await getSolInitialInfo();
     if(+solanaInitialInfo.solana.usd_24h_change < 0){
         console.log("Solana is going down, let's buy some!");
-        await buyAction(solanaPrice, buyOrders, sellOrders, solanaWallet);
+        await buyAction(+(await getSolanaPriceFor1SOL()).toFixed(4), buyOrders, sellOrders, solanaWallet);
     }
 
     // Create a function that loop itself when it is finished
     while (true) {
         // Get the actual price of 1 SOL vs USDC
-        var solanaPrice = +(await getSolanaPriceFor1SOL()).toFixed(4);
+        let solanaPrice = +(await getSolanaPriceFor1SOL()).toFixed(4);
 
         // If the price is equals or below the lowest buy order inside the array, buy the coin
         if (solanaPrice <= buyOrders[0]) {
