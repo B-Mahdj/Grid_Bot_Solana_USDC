@@ -42,8 +42,7 @@ export async function launch() {
     }, 1800000);
 
     let solanaInitialInfo = await getSolInitialInfo();
-    let solanaVariation = solanaInitialInfo.usd_24h_change;
-    if(+solanaInitialInfo.usd_24h_change < 0){
+    if(+solanaInitialInfo.solana.usd_24h_change < 0){
         console.log("Solana is going down, let's buy some!");
         await buyAction(solanaPrice, buyOrders, sellOrders, solanaWallet);
     }
