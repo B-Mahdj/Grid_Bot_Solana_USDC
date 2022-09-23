@@ -37,8 +37,9 @@ export async function launch() {
         console.log("Price of 1 SOL:", +(await getSolanaPriceFor1SOL()).toFixed(4));
     }, 3600000);
     //Every 30 minutes, update the amount of USDC to sell
-    setInterval(async function () {
+    setInterval(async function () { 
         amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
+        console.log("Amount of USDC to sell updated is :", amountOfUSDCToSell);
     }, 1800000);
 
     let solanaInitialInfo = await getSolInitialInfo();
