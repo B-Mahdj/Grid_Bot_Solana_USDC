@@ -3,7 +3,7 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Wallet } from "@project-serum/anchor";
 
 export async function getUSDCBalance(wallet: string, solanaConnection: Connection): Promise<number> {
-    var tokenBalanceUSDC: number = 0;
+    let tokenBalanceUSDC: number = 0;
     const filters:GetProgramAccountsFilter[] = [
         {
           dataSize: 165,    //size of account (bytes)
@@ -31,7 +31,7 @@ export async function getUSDCBalance(wallet: string, solanaConnection: Connectio
 }
 
 export async function getWSolBalance(wallet: string, solanaConnection: Connection): Promise<number> {
-  var tokenBalanceWSol: number = 0;
+  let tokenBalanceWSol: number = 0;
   const filters:GetProgramAccountsFilter[] = [
       {
         dataSize: 165,    //size of account (bytes)
@@ -60,9 +60,9 @@ export async function getWSolBalance(wallet: string, solanaConnection: Connectio
 
 
 export async function getAmountSolToSell(wallet:Wallet, solanaConnection: Connection): Promise<number> {
-  var wsolBalance = await getWSolBalance(wallet.publicKey.toString(),solanaConnection);
+  let wsolBalance = await getWSolBalance(wallet.publicKey.toString(),solanaConnection);
   console.log("WSol Balance", wsolBalance);
-  var amountSolToSell = wsolBalance * +process.env.PERCENTAGE_OF_BALANCE_TO_SELL;
+  let amountSolToSell = wsolBalance * +process.env.PERCENTAGE_OF_BALANCE_TO_SELL;
   if(amountSolToSell > +process.env.MIN_AMOUNT_SOL_TO_SELL && amountSolToSell < +process.env.MAX_AMOUNT_SOL_TO_SELL) {
     return amountSolToSell;
   }
@@ -76,9 +76,9 @@ export async function getAmountSolToSell(wallet:Wallet, solanaConnection: Connec
 
 
 export async function getAmountOfUSDCToSell(wallet:Wallet, solanaConnection: Connection): Promise<number> {
-  var usdcBalance = await getUSDCBalance(wallet.publicKey.toString(),solanaConnection);
+  let usdcBalance = await getUSDCBalance(wallet.publicKey.toString(),solanaConnection);
   console.log("Usdc Balance", usdcBalance);
-  var amountOfUSDCToSell = usdcBalance * +process.env.PERCENTAGE_OF_USDC_TO_SELL;
+  let amountOfUSDCToSell = usdcBalance * +process.env.PERCENTAGE_OF_USDC_TO_SELL;
   if(amountOfUSDCToSell > +process.env.MIN_AMOUNT_USDC_TO_SELL && amountOfUSDCToSell < +process.env.MAX_AMOUNT_USDC_TO_SELL) {
     return amountOfUSDCToSell;
   }

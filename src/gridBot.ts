@@ -11,11 +11,11 @@ const solana = new Connection(process.env.SOLANA_RPC_URL, {
     commitment: 'finalized',
     wsEndpoint: process.env.SOLANA_WS_ENDPOINT,
 });
-var numberOfSells = 0;
-var numberOfBuys = 0;
-var amountOfSolToSell: number[] = [];
-var amountOfUSDCToSell = 0;
-var positionTaken: number[] = [];
+let numberOfSells = 0;
+let numberOfBuys = 0;
+let amountOfSolToSell: number[] = [];
+let amountOfUSDCToSell = 0;
+let positionTaken: number[] = [];
 const MAX_NUMBER_OF_TRIES = 5;
 
 const app = express();
@@ -29,8 +29,8 @@ export async function launch() {
     console.log("Amount of sol to sell:", amountOfSolToSell);
     console.log("Amount of USDC to sell:", amountOfUSDCToSell);
 
-    var buyOrders = orders.buyOrders;
-    var sellOrders = orders.sellOrders;
+    let buyOrders = orders.buyOrders;
+    let sellOrders = orders.sellOrders;
 
     // Every 1 hour : print the price 
     setInterval(async function () {
@@ -109,7 +109,7 @@ async function sellAction(solanaPrice: number, buyOrders: number[], sellOrders: 
         }
         else {
             // Calculate the profit of the sell order
-            var profit = await calculateProfit(positionTaken[0], solanaPrice, amountOfSolToSell[0]);
+            let profit = await calculateProfit(positionTaken[0], solanaPrice, amountOfSolToSell[0]);
             console.log("Profit from this sell order (without fees) is:", profit);
             positionTaken.splice(0, 1);
             console.log("Position taken updated :", positionTaken);
@@ -159,15 +159,13 @@ async function buySolana(route: any[], wallet: Wallet): Promise<boolean> {
 
 async function sellSolana(route: any[], wallet: Wallet): Promise<boolean> {
     // Make the sell order
-    var transactions = await createTransactions(route, wallet);
-    var setupTransaction, swapTransaction, cleanupTransaction;
+    let transactions = await createTransactions(route, wallet);
+    let setupTransaction, swapTransaction, cleanupTransaction;
     if (transactions.setupTransaction !== undefined) { setupTransaction = transactions.setupTransaction; }
     if (transactions.swapTransaction !== undefined) { swapTransaction = transactions.swapTransaction; }
     if (transactions.cleanupTransaction !== undefined) { cleanupTransaction = transactions.cleanupTransaction; }
 
-    //console.log("setupTransaction:", setupTransaction);
     console.log("swapTransaction:", swapTransaction);
-    //console.log("cleanupTransaction:", cleanupTransaction);
 
     try {
         let success: boolean = await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
@@ -218,7 +216,7 @@ async function executeTransactions(setupTransaction: string, swapTransaction: st
         console.log("txid:", txid);
         // MAYBE TO DELETE :
         console.log("Waiting for solana to confirm transaction:", txid);
-        return await waitForConfirmation(txid, latestBlockHash);
+        return waitForConfirmation(txid, latestBlockHash);
     }
 }
 

@@ -53,12 +53,12 @@ export async function getSolInitialInfo() {
 
 export async function getSolanaWallet(){
     //Create a Uint8Array from process.env.SOLANA_ACCOUNT_SECRET_KEY
-    var secretKeyJSON = process.env.SOLANA_ACCOUNT_SECRET_KEY.split(',');
-    var secretKeyJSONToNumber = secretKeyJSON.map(str => {
+    let secretKeyJSON = process.env.SOLANA_ACCOUNT_SECRET_KEY.split(',');
+    let secretKeyJSONToNumber = secretKeyJSON.map(str => {
         return Number(str);
       });
 
-    var secretKey = new Uint8Array(secretKeyJSONToNumber);
+    let secretKey = new Uint8Array(secretKeyJSONToNumber);
     const keypair = Keypair.fromSecretKey(secretKey);
 
     const wallet = new Wallet(keypair);
