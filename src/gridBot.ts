@@ -37,7 +37,7 @@ export async function launch() {
         console.log("Price of 1 SOL:", +(await getSolanaPriceFor1SOL()).toFixed(4));
     }, 3600000);
     //Every 30 minutes, update the amount of USDC to sell
-    setInterval(async function () { 
+    setInterval(async function () {
         amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
         console.log("Amount of USDC to sell updated is :", amountOfUSDCToSell);
     }, 1800000);
@@ -68,7 +68,7 @@ export async function launch() {
 }
 
 async function buyAction(solanaPrice: number, buyOrders: number[], sellOrders: number[], solanaWallet: Wallet): Promise<void> {
-    if (amountOfUSDCToSell > 0) {   
+    if (amountOfUSDCToSell > 0) {
         console.log("Price, " + solanaPrice + " is lower than the lowest buy order, " + buyOrders[0]);
         const [price, bestRoute] = await getSolanaPriceAndBestRouteToBuySol(amountOfUSDCToSell);
         console.log("Using " + amountOfUSDCToSell + " USDC to buy " + price + " SOL");
@@ -140,7 +140,6 @@ async function buySolana(route: any[], wallet: Wallet): Promise<boolean> {
     if (transactions.swapTransaction !== undefined) { swapTransaction = transactions.swapTransaction; }
     if (transactions.cleanupTransaction !== undefined) { cleanupTransaction = transactions.cleanupTransaction; }
 
-    console.log("Transaction for buying : ");
     console.log("swapTransaction:", swapTransaction);
 
     try {
@@ -229,38 +228,15 @@ async function waitForConfirmation(txid: string, latestBlockHash: BlockhashWithE
     console.log("Result of confirmation:", resultOfConfirmation);
     console.log("Result of confirmation signature result: ", resultOfConfirmation.value);
 
-    // Make sure the transaction is "pushed" on the blockchain
-    let transactionConfirmed = false;
-    let numberOfTry = 0;
-    while (transactionConfirmed === false && numberOfTry < MAX_NUMBER_OF_TRIES) {
-        numberOfTry++;
-        resultOfConfirmation = await solana.confirmTransaction({
-            blockhash: latestBlockHash.blockhash,
-            lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-            signature: txid,
-        });
-        if (resultOfConfirmation == null) {
-            await sleep(3000);
-        }
-        else {
-            transactionConfirmed = true;
-        }
-    }
-
     // Make sure the transaction is not failed
-    if (transactionConfirmed) {
-        if (resultOfConfirmation.value.err != null) {
-            console.log("Transaction failed with erros:", resultOfConfirmation.value.err);
-            return false;
-        }
-        else {
-            console.log("confirmedTransaction:", resultOfConfirmation);
-            console.log(`https://solscan.io/tx/${txid}`);
-            return true;
-        }
+    if (resultOfConfirmation.value.err != null) {
+        console.log("Transaction failed with erros:", resultOfConfirmation.value.err);
+        return false;
     }
     else {
-        return false;
+        console.log("confirmedTransaction:", resultOfConfirmation);
+        console.log(`https://solscan.io/tx/${txid}`);
+        return true;
     }
 }
 
