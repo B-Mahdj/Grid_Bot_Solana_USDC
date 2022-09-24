@@ -16,7 +16,6 @@ let numberOfBuys = 0;
 let amountOfSolToSell: number[] = [];
 let amountOfUSDCToSell = 0;
 let positionTaken: number[] = [];
-const MAX_NUMBER_OF_TRIES = 5;
 
 const app = express();
 app.listen(port, () => console.log(`App listening on port ${port}!`));

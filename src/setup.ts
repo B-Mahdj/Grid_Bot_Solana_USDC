@@ -2,7 +2,9 @@ require('dotenv').config();
 import { Keypair } from "@solana/web3.js";
 import { Wallet } from '@project-serum/anchor';
 import { default as axios } from 'axios';
-const NUMBER_OF_ORDERS_TO_CREATE = 10;
+const NUMBER_OF_BUY_ORDERS_TO_CREATE_INITIALLY = 10;
+const NUMBER_OF_SELL_ORDERS_TO_CREATE_INITIALLY = 1;
+
 
 export async function setup(){
     const solanaWallet = await getSolanaWallet();
@@ -23,14 +25,14 @@ async function createInitialBuyAndSellOrders(){
     const buyOrders = [];
     const sellOrders = [];
     console.log("Creating orders...");
-    for(let i = 1; i <= NUMBER_OF_ORDERS_TO_CREATE; i++){
+    for(let i = 1; i <= NUMBER_OF_BUY_ORDERS_TO_CREATE_INITIALLY; i++){
         console.log("Creating buy order no. ", i);
         let buyOrder:number = initialPrice - ((variation*i) * initialPrice);
         buyOrder = +buyOrder.toFixed(4);
         console.log("Buy order equals : ", buyOrder);
         buyOrders.push(buyOrder);
     }
-    for(let i = 1; i <= NUMBER_OF_ORDERS_TO_CREATE; i++){
+    for(let i = 1; i <= NUMBER_OF_SELL_ORDERS_TO_CREATE_INITIALLY; i++){
         console.log("Creating sell order no. ", i);
         let sellOrder:number = initialPrice + ((variation*i) * initialPrice);
         sellOrder = +sellOrder.toFixed(4);
