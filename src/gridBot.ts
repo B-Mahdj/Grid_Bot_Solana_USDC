@@ -81,7 +81,7 @@ async function buyAction(solanaPrice: number, buyOrders: number[], sellOrders: n
             buyOrders.splice(0, 1);
             console.log("Buy order updated:", buyOrders);
             // Update the sell orders array with a new sell order at the start of the array
-            sellOrders.unshift(solanaPrice + ((variation) * solanaPrice));
+            sellOrders.unshift(+((solanaPrice + ((variation) * solanaPrice)).toFixed(4)));
             // Sort the sellOrders in ascending orders
             sellOrders.sort(function (a, b) { return a - b });
             console.log("Sell orders updated :", sellOrders);
@@ -117,7 +117,7 @@ async function sellAction(solanaPrice: number, buyOrders: number[], sellOrders: 
             sellOrders.splice(0, 1);
             console.log("Sell orders updated :", sellOrders);
             // Update the buy orders array with a new buy order at the start of the array
-            buyOrders.unshift(solanaPrice - ((variation) * solanaPrice));
+            buyOrders.unshift(+((solanaPrice - ((variation) * solanaPrice)).toFixed(4)));
             // Sort the buyOrders in descending order
             buyOrders.sort(function (a, b) { return b - a });
             console.log("buyOrders updated are :", buyOrders);
