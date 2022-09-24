@@ -132,18 +132,15 @@ async function sellAction(solanaPrice: number, buyOrders: number[], sellOrders: 
 }
 
 async function buySolana(route: any[], wallet: Wallet): Promise<boolean> {
-
     // Make the buy order
     let transactions = await createTransactions(route, wallet);
-    let setupTransaction, swapTransaction, cleanupTransaction;
-    if (transactions.setupTransaction !== undefined) { setupTransaction = transactions.setupTransaction; }
+    let swapTransaction;
     if (transactions.swapTransaction !== undefined) { swapTransaction = transactions.swapTransaction; }
-    if (transactions.cleanupTransaction !== undefined) { cleanupTransaction = transactions.cleanupTransaction; }
 
     console.log("swapTransaction:", swapTransaction);
 
     try {
-        let success: boolean = await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+        let success: boolean = await executeTransactions(swapTransaction, wallet);
         if (success) {
             numberOfBuys++;
             console.log("Number of buys:", numberOfBuys);
@@ -159,15 +156,13 @@ async function buySolana(route: any[], wallet: Wallet): Promise<boolean> {
 async function sellSolana(route: any[], wallet: Wallet): Promise<boolean> {
     // Make the sell order
     let transactions = await createTransactions(route, wallet);
-    let setupTransaction, swapTransaction, cleanupTransaction;
-    if (transactions.setupTransaction !== undefined) { setupTransaction = transactions.setupTransaction; }
+    let swapTransaction;
     if (transactions.swapTransaction !== undefined) { swapTransaction = transactions.swapTransaction; }
-    if (transactions.cleanupTransaction !== undefined) { cleanupTransaction = transactions.cleanupTransaction; }
 
     console.log("swapTransaction:", swapTransaction);
 
     try {
-        let success: boolean = await executeTransactions(setupTransaction, swapTransaction, cleanupTransaction, wallet);
+        let success: boolean = await executeTransactions(swapTransaction, wallet);
         if (success) {
             numberOfSells++;
             console.log("Number of sells:", numberOfSells);
@@ -202,8 +197,8 @@ async function createTransactions(route: any[], wallet: Wallet) {
     return transactions;
 }
 
-async function executeTransactions(setupTransaction: string, swapTransaction: string, cleanupTransaction: string, wallet: Wallet): Promise<boolean> {
-    for (let serializedTransaction of [setupTransaction, swapTransaction, cleanupTransaction].filter(Boolean)) {
+async function executeTransactions(swapTransaction: string,wallet: Wallet): Promise<boolean> {
+    for (let serializedTransaction of [swapTransaction].filter(Boolean)) {
         // get transaction object from serialized transaction
         const transaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
         let latestBlockHash = await solana.getLatestBlockhash();
