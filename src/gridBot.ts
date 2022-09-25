@@ -16,39 +16,54 @@ let numberOfBuys = 0;
 let amountOfSolToSell: number[] = [];
 let amountOfUSDCToSell = 0;
 let positionTaken: number[] = [];
+let buyOrders: number[] = [];
+let sellOrders: number[] = [];
+let solanaWallet:Wallet;
 
 const app = express();
 app.listen(port, () => console.log(`App listening on port ${port}!`));
 launch();
 
 export async function launch() {
-    const { solanaWallet, orders } = await setup();
-    console.log("Solana wallet:", solanaWallet.publicKey.toString());
-    amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
-    console.log("Amount of sol to sell:", amountOfSolToSell);
-    console.log("Amount of USDC to sell:", amountOfUSDCToSell);
-
-    let buyOrders = orders.buyOrders;
-    let sellOrders = orders.sellOrders;
-
-    // Every 1 hour : print the price 
-    setInterval(async function () {
-        console.log("Price of 1 SOL:", +(await getSolanaPriceFor1SOL()).toFixed(4));
-    }, 3600000);
-    //Every 30 minutes, update the amount of USDC to sell
-    setInterval(async function () {
+    try {
+        let setupResult = await setup();
+        solanaWallet = setupResult.solanaWallet;
+        let orders = setupResult.orders;
+        console.log("Solana wallet:", solanaWallet.publicKey.toString());
         amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
-        console.log("Amount of USDC to sell updated is :", amountOfUSDCToSell);
-    }, 1800000);
-
-    let solanaInitialInfo = await getSolInitialInfo();
-    if(+solanaInitialInfo.solana.usd_24h_change < 0){
-        console.log("Solana is going down, let's buy some!");
-        await buyAction(+(await getSolanaPriceFor1SOL()).toFixed(4), buyOrders, sellOrders, solanaWallet);
+        console.log("Amount of sol to sell:", amountOfSolToSell);
+        console.log("Amount of USDC to sell:", amountOfUSDCToSell);
+    
+        buyOrders = orders.buyOrders;
+        sellOrders = orders.sellOrders;
+    
+        // Every 1 hour : print the price 
+        setInterval(async function () {
+            console.log("Price of 1 SOL:", +(await getSolanaPriceFor1SOL()).toFixed(4));
+        }, 3600000);
+        //Every 30 minutes, update the amount of USDC to sell
+        setInterval(async function () {
+            amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
+            console.log("Amount of USDC to sell updated is :", amountOfUSDCToSell);
+        }, 1800000);
+    
+        let solanaInitialInfo = await getSolInitialInfo();
+        if (+solanaInitialInfo.solana.usd_24h_change < 0) {
+            console.log("Solana is going down, let's buy some!");
+            await buyAction(+(await getSolanaPriceFor1SOL()).toFixed(4), buyOrders, sellOrders, solanaWallet);
+        }
+    }
+    catch (e) {
+        console.log(e);
     }
 
-    // Create a function that loop itself when it is finished
     while (true) {
+        await loopAction();
+    }
+}
+
+async function loopAction(){
+    try {
         // Get the actual price of 1 SOL vs USDC
         let solanaPrice = +(await getSolanaPriceFor1SOL()).toFixed(4);
 
@@ -63,6 +78,9 @@ export async function launch() {
         }
 
         await sleep(1000);
+    }
+    catch (e) {
+        console.log(e);
     }
 }
 
@@ -196,7 +214,7 @@ async function createTransactions(route: any[], wallet: Wallet) {
     return transactions;
 }
 
-async function executeTransactions(swapTransaction: string,wallet: Wallet): Promise<boolean> {
+async function executeTransactions(swapTransaction: string, wallet: Wallet): Promise<boolean> {
     for (let serializedTransaction of [swapTransaction].filter(Boolean)) {
         // get transaction object from serialized transaction
         const transaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
