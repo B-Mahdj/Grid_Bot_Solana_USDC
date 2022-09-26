@@ -54,6 +54,7 @@ export async function launch() {
         }
     }
     catch (e) {
+        console.log("Error in launch");
         console.log(e);
     }
 
@@ -80,6 +81,7 @@ async function loopAction(){
         await sleep(1000);
     }
     catch (e) {
+        console.log("Error in loopAction");
         console.log(e);
     }
 }
