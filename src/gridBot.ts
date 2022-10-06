@@ -2,7 +2,7 @@ import { Wallet } from '@project-serum/anchor';
 import { BlockhashWithExpiryBlockHeight, Connection, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getAmountOfUSDCToSell } from './getTokens';
 import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL, calculateProfit } from './getPrices';
-import { setup, getSolInitialInfo } from './setup';
+import { setup, getSolInitialInfo, getSolOfficialPrice } from './setup';
 import fetch from 'cross-fetch';
 const express = require('express');
 const port = 3000;
@@ -52,6 +52,17 @@ export async function launch() {
             console.log("Solana is going down, let's buy some!");
             await buyAction(+(await getSolanaPriceFor1SOL()).toFixed(4), buyOrders, sellOrders, solanaWallet);
         }
+
+        // Every 30 minutes, check if we need to sell everything
+        setInterval(async function () {
+            if(await stopLossCheck(positionTaken)){
+                console.log("Stop loss reached, let's sell!");
+                for(let i = 0; i < positionTaken.length; i++){
+                    await sellAction(+(await getSolOfficialPrice()).toFixed(4), buyOrders, sellOrders, solanaWallet);
+                }
+            }
+        }, 1800000);
+
     }
     catch (e) {
         console.log("Error in launch");
@@ -77,13 +88,23 @@ async function loopAction(){
         if (solanaPrice >= sellOrders[0]) {
             await sellAction(solanaPrice, buyOrders, sellOrders, solanaWallet);
         }
-
-        await sleep(1000);
     }
     catch (e) {
         console.log("Error in loopAction");
         console.log(e);
     }
+}
+
+async function stopLossCheck(positionTaken:number[]): Promise<boolean>{
+    let solanaOfficialPrice = +(await getSolOfficialPrice()).toFixed(4);
+    if(positionTaken.length > 0 && positionTaken[0] !== undefined){
+        let stopLossPrice = positionTaken[0] - (positionTaken[0] * +process.env.STOP_LOSS_PERCENTAGE);
+        console.log("Stop loss price:", stopLossPrice);
+        if(solanaOfficialPrice <= stopLossPrice){
+            return true;
+        }
+    }
+    return false;
 }
 
 async function buyAction(solanaPrice: number, buyOrders: number[], sellOrders: number[], solanaWallet: Wallet): Promise<void> {

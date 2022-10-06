@@ -53,6 +53,16 @@ export async function getSolInitialInfo() {
     }
 }
 
+export async function getSolOfficialPrice(){
+    try {
+        const solPrice = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd`);
+        return solPrice.data.solana.usd;
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
 export async function getSolanaWallet(){
     //Create a Uint8Array from process.env.SOLANA_ACCOUNT_SECRET_KEY
     let secretKeyJSON = process.env.SOLANA_ACCOUNT_SECRET_KEY.split(',');
