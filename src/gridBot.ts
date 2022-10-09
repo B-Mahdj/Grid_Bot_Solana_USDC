@@ -5,7 +5,7 @@ import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol
 import { setup, getSolInitialInfo, getSolOfficialPrice } from './setup';
 import fetch from 'cross-fetch';
 const express = require('express');
-const port = 3000;
+const port = 8080;
 const variation: number = +process.env.DECIMAL_VARIATION;
 const solana = new Connection(process.env.SOLANA_RPC_URL, {
     commitment: 'finalized',
