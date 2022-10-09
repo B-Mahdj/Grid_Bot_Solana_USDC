@@ -64,6 +64,8 @@ export async function launch() {
             }
         }, 1800000);
 
+        await sleep(1000);
+
     }
     catch (e) {
         console.log("Error in launch");

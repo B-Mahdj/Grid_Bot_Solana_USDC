@@ -19,7 +19,7 @@ export async function setup(){
 async function createInitialBuyAndSellOrders(){
     // Get the Solana initial price & variation wanted
     const solanaInfo = await getSolInitialInfo();
-    const initialPrice = solanaInfo.solana.usd;
+    const initialPrice = +process.env.INITIAL_PRICE || solanaInfo.price;
     const variation:number = +process.env.DECIMAL_VARIATION;
 
     const buyOrders = [];
