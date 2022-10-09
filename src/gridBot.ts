@@ -19,6 +19,7 @@ let positionTaken: number[] = [];
 let buyOrders: number[] = [];
 let sellOrders: number[] = [];
 let solanaWallet:Wallet;
+let totalProfit = 0;
 
 const app = express();
 app.listen(port, () => console.log(`App listening on port ${port}!`));
@@ -150,7 +151,9 @@ async function sellAction(solanaPrice: number, buyOrders: number[], sellOrders: 
         else {
             // Calculate the profit of the sell order
             let profit = await calculateProfit(positionTaken[0], solanaPrice, amountOfSolToSell[0]);
+            totalProfit += profit;
             console.log("Profit from this sell order (without fees) is:", profit);
+            console.log("Total profit is:", totalProfit);
             positionTaken.splice(0, 1);
             console.log("Position taken updated :", positionTaken);
             // Delete the sell order executed
