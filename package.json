@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx ts-node src/gridBot.ts",
+    "start": "npx ts-node src/gridBot.ts ",
+    "compile": "tsc chart/chart.ts",
     "cashout_all_SOL": "npx ts-node scripts/move_SOL_to_main.ts"
   },
   "keywords": [],
@@ -17,6 +18,10 @@
     "axios": "^0.27.2",
     "cross-fetch": "^3.1.5",
     "dotenv": "^16.0.1",
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "lightweight-charts": "^3.8.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.8.4"
   }
 }

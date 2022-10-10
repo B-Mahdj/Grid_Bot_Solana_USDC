@@ -6,6 +6,7 @@ import { setup, getSolInitialInfo, getSolOfficialPrice } from './setup';
 import fetch from 'cross-fetch';
 const express = require('express');
 const port = 3000;
+import path from 'path';
 const variation: number = +process.env.DECIMAL_VARIATION;
 const solana = new Connection(process.env.SOLANA_RPC_URL, {
     commitment: 'finalized',
@@ -47,6 +48,8 @@ export async function launch() {
             amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
             console.log("Amount of USDC to sell updated is :", amountOfUSDCToSell);
         }, 1800000);
+
+        await sleep(99999999);
     
         let solanaInitialInfo = await getSolInitialInfo();
         if (+solanaInitialInfo.solana.usd_24h_change < 0) {
@@ -285,3 +288,10 @@ export async function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+app.get('/',function(req,res) {
+    res.sendFile(path.join(__dirname+'/../chart/index.html'));
+});
+
+app.get('/chart.js',function(req,res) {
+    res.sendFile(path.join(__dirname+'/../chart/chart.js'));
+});
