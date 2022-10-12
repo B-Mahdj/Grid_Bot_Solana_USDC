@@ -3,6 +3,7 @@ import { BlockhashWithExpiryBlockHeight, Connection, sendAndConfirmTransaction, 
 import { getAmountOfUSDCToSell } from './getTokens';
 import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL, calculateProfit } from './getPrices';
 import { setup, getSolInitialInfo, getSolOfficialPrice } from './setup';
+const Chart = require('../chart/chart.js');
 import fetch from 'cross-fetch';
 const express = require('express');
 const port = 3000;
@@ -49,7 +50,7 @@ export async function launch() {
             console.log("Amount of USDC to sell updated is :", amountOfUSDCToSell);
         }, 1800000);
 
-        await sleep(99999999);
+        /*
     
         let solanaInitialInfo = await getSolInitialInfo();
         if (+solanaInitialInfo.solana.usd_24h_change < 0) {
@@ -66,6 +67,8 @@ export async function launch() {
                 }
             }
         }, 1800000);
+
+        */
 
         await sleep(1000);
 
@@ -85,6 +88,10 @@ async function loopAction(){
         // Get the actual price of 1 SOL vs USDC
         let solanaPrice = +(await getSolanaPriceFor1SOL()).toFixed(4);
 
+        // Add this data to chart
+        Chart.addDataToChart(Date.now(), solanaPrice);
+
+        /*
         // If the price is equals or below the lowest buy order inside the array, buy the coin
         if (solanaPrice <= buyOrders[0]) {
             await buyAction(solanaPrice, buyOrders, sellOrders, solanaWallet);
@@ -94,6 +101,7 @@ async function loopAction(){
         if (solanaPrice >= sellOrders[0]) {
             await sellAction(solanaPrice, buyOrders, sellOrders, solanaWallet);
         }
+        */
     }
     catch (e) {
         console.log("Error in loopAction");
