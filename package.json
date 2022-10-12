@@ -6,6 +6,7 @@
   "scripts": {
     "start": "npx ts-node src/gridBot.ts ",
     "compile": "tsc chart/chart.ts",
+    "compile_all": "npx tsc",
     "cashout_all_SOL": "npx ts-node scripts/move_SOL_to_main.ts"
   },
   "keywords": [],
