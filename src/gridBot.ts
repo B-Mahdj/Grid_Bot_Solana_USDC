@@ -2,12 +2,10 @@ import { Wallet } from '@project-serum/anchor';
 import { BlockhashWithExpiryBlockHeight, Connection, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getAmountOfUSDCToSell } from './getTokens';
 import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL, calculateProfit } from './getPrices';
-import { setup, getSolInitialInfo, getSolOfficialPrice } from './setup';
-const Chart = require('../chart/chart.js');
+import { setup, getSolOfficialPrice } from './setup';
 import fetch from 'cross-fetch';
 const express = require('express');
 const port = 3000;
-import path from 'path';
 const variation: number = +process.env.DECIMAL_VARIATION;
 const solana = new Connection(process.env.SOLANA_RPC_URL, {
     commitment: 'finalized',
@@ -87,9 +85,6 @@ async function loopAction(){
     try {
         // Get the actual price of 1 SOL vs USDC
         let solanaPrice = +(await getSolanaPriceFor1SOL()).toFixed(4);
-
-        // Add this data to chart
-        Chart.addDataToChart(Date.now(), solanaPrice);
 
         /*
         // If the price is equals or below the lowest buy order inside the array, buy the coin
@@ -297,9 +292,15 @@ export async function sleep(ms: number) {
 }
 
 app.get('/',function(req,res) {
-    res.sendFile(path.join(__dirname+'/../chart/index.html'));
-});
-
-app.get('/chart.js',function(req,res) {
-    res.sendFile(path.join(__dirname+'/../chart/chart.js'));
+    // Return buy orders, sell orders, position taken, amount of sol to sell, amount of usdc to sell
+    res.send({
+        "buyOrders": buyOrders,
+        "sellOrders": sellOrders,
+        "positionTaken": positionTaken,
+        "amountOfSolToSell": amountOfSolToSell,
+        "amountOfUSDCToSell": amountOfUSDCToSell,
+        "totalProfit": totalProfit,
+        "numberOfBuys": numberOfBuys,
+        "numberOfSells": numberOfSells
+    });
 });
