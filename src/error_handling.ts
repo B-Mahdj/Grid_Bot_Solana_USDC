@@ -4,8 +4,6 @@ export async function manage_axios_error(error:any) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
         console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
     } else if (error.request) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
@@ -15,5 +13,4 @@ export async function manage_axios_error(error:any) {
         // Something happened in setting up the request that triggered an Error
         console.log('Error', error.message);
     }
-    console.log(error.config);
 }
