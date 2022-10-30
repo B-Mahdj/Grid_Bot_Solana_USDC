@@ -18,7 +18,7 @@ export async function getSolanaPriceFor1SOL(): Promise<number> {
         return routes[0].outAmountWithSlippage / DECIMALS_PER_USDC;
     }
     catch (error) {
-        manage_axios_error(error);
+        await manage_axios_error(error);
     }
 }
 
@@ -36,7 +36,7 @@ export async function getSolanaPriceAndBestRouteToSellSol(amount:number): Promis
         return [(routes[0].outAmountWithSlippage / DECIMALS_PER_USDC), routes[0]];
     }
     catch (error) {
-        manage_axios_error(error);
+        await manage_axios_error(error);
     }
 }
 
@@ -52,7 +52,7 @@ export async function getSolanaPriceAndBestRouteToBuySol(amount:number): Promise
         const routes = data;
         return [(routes[0].outAmountWithSlippage / LAMPORTS_PER_SOL), routes[0]];
     } catch(error){
-        manage_axios_error(error);
+        await manage_axios_error(error);
     }
 }
 

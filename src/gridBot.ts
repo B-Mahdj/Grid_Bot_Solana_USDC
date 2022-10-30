@@ -84,7 +84,7 @@ export async function launch() {
 async function loopAction(){
     try {
         // Get the actual price of 1 SOL vs USDC
-        let solanaPrice = +(await getSolanaPriceFor1SOL()).toFixed(4);
+        let solanaPrice = +(await getSolanaPriceFor1SOL())?.toFixed(4);
 
         /*
         // If the price is equals or below the lowest buy order inside the array, buy the coin
