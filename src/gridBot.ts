@@ -2,7 +2,7 @@ import { Wallet } from '@project-serum/anchor';
 import { BlockhashWithExpiryBlockHeight, Connection, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getAmountOfUSDCToSell } from './getTokens';
 import { getSolanaPriceAndBestRouteToBuySol, getSolanaPriceAndBestRouteToSellSol, getSolanaPriceFor1SOL, calculateProfit } from './getPrices';
-import { setup, getSolOfficialPrice } from './setup';
+import { setup, getSolOfficialPrice, getSolInitialInfo } from './setup';
 import fetch from 'cross-fetch';
 const express = require('express');
 const port = 3000;
@@ -47,8 +47,6 @@ export async function launch() {
             amountOfUSDCToSell = await getAmountOfUSDCToSell(solanaWallet, solana);
             console.log("Amount of USDC to sell updated is :", amountOfUSDCToSell);
         }, 1800000);
-
-        /*
     
         let solanaInitialInfo = await getSolInitialInfo();
         if (+solanaInitialInfo.solana.usd_24h_change < 0) {
@@ -65,8 +63,6 @@ export async function launch() {
                 }
             }
         }, 1800000);
-
-        */
 
         await sleep(1000);
 
@@ -86,7 +82,6 @@ async function loopAction(){
         // Get the actual price of 1 SOL vs USDC
         let solanaPrice = +(await getSolanaPriceFor1SOL())?.toFixed(4);
 
-        /*
         // If the price is equals or below the lowest buy order inside the array, buy the coin
         if (solanaPrice <= buyOrders[0]) {
             await buyAction(solanaPrice, buyOrders, sellOrders, solanaWallet);
@@ -96,7 +91,6 @@ async function loopAction(){
         if (solanaPrice >= sellOrders[0]) {
             await sellAction(solanaPrice, buyOrders, sellOrders, solanaWallet);
         }
-        */
     }
     catch (e) {
         console.log("Error in loopAction");
